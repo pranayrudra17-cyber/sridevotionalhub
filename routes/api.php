@@ -232,6 +232,7 @@ Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function() {
 
     Route::post('offline/payment/submit', 'App\Http\Controllers\Api\V2\OfflinePaymentController@submit')->name('api.offline.payment.submit');
 
+    Route::post('check-pincode', 'App\Http\Controllers\Api\V2\DeliveryAvailabilityController@check');
     Route::post('order/store', 'App\Http\Controllers\Api\V2\OrderController@store')->middleware('auth:sanctum');
 
     Route::get('profile/counters', 'App\Http\Controllers\Api\V2\ProfileController@counters')->middleware('auth:sanctum');

@@ -148,4 +148,52 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0 h6">{{translate('Serviceable Pincodes / Zipcodes')}}</h5>
+            </div>
+            <form action="{{ route('shipping_configuration.update') }}" method="POST" enctype="multipart/form-data">
+              <div class="card-body">
+                  @csrf
+                  <input type="hidden" name="type" value="serviceable_pincodes">
+                  <div class="form-group">
+                      <div class="col-lg-12">
+                          <textarea class="form-control" name="serviceable_pincodes" rows="4" placeholder="500072,500073,500074,500075">{{ get_setting('serviceable_pincodes') }}</textarea>
+                          <small class="form-text text-muted">{{ translate('Enter comma-separated pincodes/zipcodes. Leave empty to allow delivery at all pincodes.') }}</small>
+                      </div>
+                  </div>
+                  <div class="form-group mb-0 text-right">
+                      <button type="submit" class="btn btn-sm btn-primary">{{translate('Save')}}</button>
+                  </div>
+              </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0 h6">{{translate('Note')}}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        {{ translate('1. This restriction applies only to products where “Restrict delivery by pincode/zipcode” is enabled.') }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ translate('2. Other products can be ordered without this pincode check.') }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ translate('3. Pickup point orders are not restricted by this list.') }}
+                    </li>
+                    <li class="list-group-item">
+                        {{ translate('4. If this field is empty, existing order booking continues without pincode restriction.') }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection

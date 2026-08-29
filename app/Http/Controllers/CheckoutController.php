@@ -15,8 +15,10 @@ use App\Models\CombinedOrder;
 use App\Models\Product;
 use App\Utility\PayhereUtility;
 use App\Utility\NotificationUtility;
+use App\Services\DeliveryAvailabilityService;
 use Session;
 use Auth;
+use Illuminate\Http\RedirectResponse;
 
 class CheckoutController extends Controller
 {
@@ -44,7 +46,10 @@ class CheckoutController extends Controller
         // Minumum order amount check end
         
         if ($request->payment_option != null) {
-            (new OrderController)->store($request);
+            $orderResponse = (new OrderController)->store($request);
+            if ($orderResponse instanceof RedirectResponse) {
+                return $orderResponse;
+            }
 
             $request->session()->put('payment_type', 'cart_payment');
             
@@ -136,17 +141,14 @@ class CheckoutController extends Controller
             $cartItem->save();
         }
 
-        $carrier_list = array();
-        if(get_setting('shipping_type') == 'carrier_wise_shipping'){
-            $zone = \App\Models\Country::where('id',$carts[0]['address']['country_id'])->first()->zone_id;
-
-            $carrier_query = Carrier::query();
-            $carrier_query->whereIn('id',function ($query) use ($zone) {
-                $query->select('carrier_id')->from('carrier_range_prices')
-                ->where('zone_id', $zone);
-            })->orWhere('free_shipping', 1);
-            $carrier_list = $carrier_query->get();
+        $carts = Cart::where('user_id', Auth::user()->id)->get();
+        $deliveryAvailability = new DeliveryAvailabilityService();
+        if (get_setting('pickup_point') != 1 && !$deliveryAvailability->validateCartForDelivery($carts)) {
+            flash($deliveryAvailability->unavailableMessage())->warning();
+            return redirect()->route('checkout.shipping_info');
         }
+
+        $carrier_list = $this->checkoutCarrierList($carts);
         
         return view('frontend.delivery_info', compact('carts','carrier_list'));
     }
@@ -194,6 +196,15 @@ class CheckoutController extends Controller
                 $shipping += $cartItem['shipping_cost'];
                 $cartItem->save();
             }
+
+            $carts = Cart::where('user_id', Auth::user()->id)->get();
+            $deliveryAvailability = new DeliveryAvailabilityService();
+            if (!$deliveryAvailability->validateCartForDelivery($carts)) {
+                flash($deliveryAvailability->unavailableMessage())->warning();
+                $carrier_list = $this->checkoutCarrierList($carts);
+                return view('frontend.delivery_info', compact('carts','carrier_list'));
+            }
+
             $total = $subtotal + $tax + $shipping;
 
             return view('frontend.payment_select', compact('carts', 'shipping_info', 'total'));
@@ -337,6 +348,13 @@ class CheckoutController extends Controller
         return back();
     }
 
+    public function check_pincode(Request $request)
+    {
+        $pincode = $request->has('pincode') ? $request->pincode : $request->postal_code;
+
+        return response()->json((new DeliveryAvailabilityService)->checkResponse($pincode));
+    }
+
     public function order_confirmed()
     {
         $combined_order = CombinedOrder::findOrFail(Session::get('combined_order_id'));
@@ -354,5 +372,32 @@ class CheckoutController extends Controller
         }
 
         return view('frontend.order_confirmed', compact('combined_order'));
+    }
+
+    private function checkoutCarrierList($carts)
+    {
+        $carrier_list = array();
+        if (get_setting('shipping_type') != 'carrier_wise_shipping' || $carts == null || count($carts) == 0) {
+            return $carrier_list;
+        }
+
+        $address = $carts[0]['address'];
+        if ($address == null) {
+            return $carrier_list;
+        }
+
+        $country = \App\Models\Country::where('id', $address['country_id'])->first();
+        if ($country == null) {
+            return $carrier_list;
+        }
+
+        $zone = $country->zone_id;
+        $carrier_query = Carrier::query();
+        $carrier_query->whereIn('id', function ($query) use ($zone) {
+            $query->select('carrier_id')->from('carrier_range_prices')
+                ->where('zone_id', $zone);
+        })->orWhere('free_shipping', 1);
+
+        return $carrier_query->get();
     }
 }

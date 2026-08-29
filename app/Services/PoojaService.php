@@ -128,6 +128,10 @@ class PoojaService
         }
         unset($collection['button']);
 
+        if (!isset($collection['pincode_restriction'])) {
+            $collection['pincode_restriction'] = 0;
+        }
+
         $data = $collection->merge(compact(
             'user_id',
             'approved',
@@ -164,6 +168,9 @@ class PoojaService
 
         if(!isset($collection['cash_on_delivery'])){
             $collection['cash_on_delivery'] = 0;
+        }
+        if(!isset($collection['pincode_restriction'])){
+            $collection['pincode_restriction'] = 0;
         }
         if(!isset($collection['featured'])){
             $collection['featured'] = 0;

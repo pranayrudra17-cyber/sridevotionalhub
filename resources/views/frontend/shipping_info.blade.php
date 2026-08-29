@@ -47,15 +47,21 @@
     <div class="container">
         <div class="row cols-xs-space cols-sm-space cols-md-space">
             <div class="col-xxl-8 col-xl-10 mx-auto">
-                <form class="form-default" data-toggle="validator" action="{{ route('checkout.store_shipping_infostore') }}" role="form" method="POST">
+                <form id="shipping-info-form" class="form-default" data-toggle="validator" action="{{ route('checkout.store_shipping_infostore') }}" role="form" method="POST">
                     @csrf
                     @if(Auth::check())
                         <div class="shadow-sm bg-white p-4 rounded mb-4">
                             <div class="row gutters-5">
+                                @php
+                                    $deliveryAvailability = app(\App\Services\DeliveryAvailabilityService::class);
+                                @endphp
                                 @foreach (Auth::user()->addresses as $key => $address)
                                     <div class="col-md-6 mb-3">
                                         <label class="aiz-megabox d-block bg-white mb-0">
-                                            <input type="radio" name="address_id" value="{{ $address->id }}" @if ($address->set_default)
+                                            <input type="radio" name="address_id" value="{{ $address->id }}"
+                                                data-postal-code="{{ $address->postal_code }}"
+                                                data-serviceable="{{ ($deliveryAvailability->isRestrictionEnabled() && $deliveryAvailability->cartHasRestrictedDeliveryItems($carts) && !$deliveryAvailability->isServiceable($address->postal_code)) ? '0' : '1' }}"
+                                                @if ($address->set_default)
                                                 checked
                                             @endif required>
                                             <span class="d-flex p-3 aiz-megabox-elem">
@@ -69,6 +75,15 @@
                                                         <span class="opacity-60">{{ translate('Postal Code') }}:</span>
                                                         <span class="fw-600 ml-2">{{ $address->postal_code }}</span>
                                                     </div>
+                                                    @if($deliveryAvailability->isRestrictionEnabled() && $deliveryAvailability->cartHasRestrictedDeliveryItems($carts))
+                                                    <div>
+                                                        @if($deliveryAvailability->isServiceable($address->postal_code))
+                                                            <span class="text-success fs-12">{{ translate('Delivery is available at this pincode.') }}</span>
+                                                        @else
+                                                            <span class="text-danger fs-12">{{ translate('Sorry, delivery is not available at this pincode.') }}</span>
+                                                        @endif
+                                                    </div>
+                                                    @endif
                                                     <div>
                                                         <span class="opacity-60">{{ translate('City') }}:</span>
                                                         <span class="fw-600 ml-2">{{ optional($address->city)->name }}</span>
@@ -118,7 +133,7 @@
                             </a>
                         </div>
                         <div class="col-md-6 text-center text-md-right">
-                            <button type="submit" class="btn btn-primary fw-600">{{ translate('Continue to Delivery Info')}}</a>
+                            <button type="submit" class="btn btn-primary fw-600">{{ translate('Continue to Delivery Info')}}</button>
                         </div>
                     </div>
                 </form>
@@ -126,6 +141,26 @@
         </div>
     </div>
 </section>
+<script>
+    (function () {
+        var form = document.getElementById('shipping-info-form');
+        if (!form) {
+            return;
+        }
+        form.addEventListener('submit', function (e) {
+            var selected = form.querySelector('input[name="address_id"]:checked');
+            if (selected && selected.getAttribute('data-serviceable') === '0') {
+                if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
+                    AIZ.plugins.notify('warning', "{{ translate('Sorry, delivery is not available at this pincode.') }}");
+                }
+                @if(get_setting('pickup_point') != 1)
+                e.preventDefault();
+                return false;
+                @endif
+            }
+        });
+    })();
+</script>
 @endsection
 
 @section('modal')

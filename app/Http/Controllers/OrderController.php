@@ -21,6 +21,7 @@ use App\Mail\InvoiceEmailManager;
 use App\Utility\NotificationUtility;
 use CoreComponentRepository;
 use App\Utility\SmsUtility;
+use App\Services\DeliveryAvailabilityService;
 use Illuminate\Support\Facades\Route;
 
 class OrderController extends Controller
@@ -118,6 +119,12 @@ class OrderController extends Controller
         if ($carts->isEmpty()) {
             flash(translate('Your cart is empty'))->warning();
             return redirect()->route('home');
+        }
+
+        $deliveryAvailability = new DeliveryAvailabilityService();
+        if (!$deliveryAvailability->validateCartForDelivery($carts)) {
+            flash($deliveryAvailability->unavailableMessage())->warning();
+            return redirect()->route('checkout.shipping_info');
         }
 
         $address = Address::where('id', $carts[0]['address_id'])->first();

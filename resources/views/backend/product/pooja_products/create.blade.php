@@ -254,6 +254,23 @@
                         </div>
                     </div>
                 </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0 h6">{{ translate('Pincode / Zipcode Restriction') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label class="col-lg-2 col-from-label">{{translate('Restrict delivery by pincode/zipcode')}}</label>
+                            <div class="col-lg-9">
+                                <label class="aiz-switch aiz-switch-success mb-0">
+                                    <input type="checkbox" name="pincode_restriction" value="1">
+                                    <span></span>
+                                </label>
+                                <small class="text-muted d-block">{{ translate('If enabled, this product can be delivered only to serviceable pincodes.') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="mb-3 text-right">
                     <button type="submit" name="button"
                         class="btn btn-primary">{{ translate('Save Product') }}</button>

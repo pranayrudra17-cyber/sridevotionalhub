@@ -88,12 +88,16 @@
                             </div>
                         @endif
                         
-                        <div class="row">
+                        <div class="row js-pincode-check-wrap">
                             <div class="col-md-2">
                                 <label>{{ translate('Postal code')}}</label>
                             </div>
                             <div class="col-md-10">
-                                <input type="text" class="form-control mb-3" placeholder="{{ translate('Your Postal Code')}}" name="postal_code" value="" required>
+                                <div class="d-flex mb-2">
+                                    <input type="text" class="form-control" placeholder="{{ translate('Your Postal Code')}}" name="postal_code" value="" required>
+                                    <button type="button" class="btn btn-sm btn-soft-primary ml-2 text-nowrap js-check-pincode">{{ translate('Check Availability') }}</button>
+                                </div>
+                                <p class="js-pincode-check-message fs-12 mb-3"></p>
                             </div>
                         </div>
                         <div class="row">
@@ -218,6 +222,35 @@
                 }
             });
         }
+
+        $(document).on('click', '.js-check-pincode', function() {
+            var $wrap = $(this).closest('.js-pincode-check-wrap');
+            var pincode = $wrap.find('[name=postal_code]').val();
+            var $message = $wrap.find('.js-pincode-check-message');
+
+            if (!pincode) {
+                $message.removeClass('text-success').addClass('text-danger').text("{{ translate('Please enter a pincode/zipcode.') }}");
+                return;
+            }
+
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: "{{ route('pincode.check') }}",
+                type: 'POST',
+                data: {
+                    pincode: pincode
+                },
+                success: function (response) {
+                    if (response.serviceable) {
+                        $message.removeClass('text-danger').addClass('text-success').text(response.message);
+                    } else {
+                        $message.removeClass('text-success').addClass('text-danger').text(response.message);
+                    }
+                }
+            });
+        });
     </script>
 
     

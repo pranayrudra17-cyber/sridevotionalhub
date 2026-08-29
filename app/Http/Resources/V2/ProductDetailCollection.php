@@ -94,7 +94,8 @@ class ProductDetailCollection extends ResourceCollection
                     'description' => $data->getTranslation('description'),
                     'video_link' => $data->video_link != null ?  $data->video_link : "",
                     'brand' => $brand,
-                    'link' => $link
+                    'link' => $link,
+                    'pincode_restriction' => (int) $data->pincode_restriction === 1,
                 ];
             })
         ];

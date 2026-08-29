@@ -531,6 +531,10 @@ class BusinessSettingsController extends Controller
 
     public function shipping_configuration_update(Request $request){
         $business_settings = BusinessSetting::where('type', $request->type)->first();
+        if ($business_settings == null) {
+            $business_settings = new BusinessSetting;
+            $business_settings->type = $request->type;
+        }
         $business_settings->value = $request[$request->type];
         $business_settings->save();
 

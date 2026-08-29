@@ -88,12 +88,16 @@
             </div>
         @endif
         
-        <div class="row">
+        <div class="row js-pincode-check-wrap">
             <div class="col-md-2">
                 <label>{{ translate('Postal code')}}</label>
             </div>
             <div class="col-md-10">
-                <input type="text" class="form-control mb-3" placeholder="{{ translate('Your Postal Code')}}" value="{{ $address_data->postal_code }}" name="postal_code" value="" required>
+                <div class="d-flex mb-2">
+                    <input type="text" class="form-control" placeholder="{{ translate('Your Postal Code')}}" value="{{ $address_data->postal_code }}" name="postal_code" required>
+                    <button type="button" class="btn btn-sm btn-soft-primary ml-2 text-nowrap js-check-pincode">{{ translate('Check Availability') }}</button>
+                </div>
+                <p class="js-pincode-check-message fs-12 mb-3"></p>
             </div>
         </div>
         <div class="row">

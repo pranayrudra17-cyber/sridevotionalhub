@@ -262,6 +262,7 @@ Route::group(['middleware' => ['customer', 'verified', 'unbanned']], function() 
             Route::post('/payment_select', 'store_delivery_info')->name('checkout.store_delivery_info');
             Route::get('/order-confirmed', 'order_confirmed')->name('order_confirmed');
             Route::post('/payment', 'checkout')->name('payment.checkout');
+            Route::post('/check-pincode', 'check_pincode')->name('pincode.check');
             Route::post('/get_pick_up_points', 'get_pick_up_points')->name('shipping_info.get_pick_up_points');
             Route::get('/payment-select', 'get_payment_info')->name('checkout.payment_info');
             Route::post('/apply_coupon_code', 'apply_coupon_code')->name('checkout.apply_coupon_code');

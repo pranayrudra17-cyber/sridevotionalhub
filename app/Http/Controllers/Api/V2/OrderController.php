@@ -16,6 +16,7 @@ use DB;
 use \App\Utility\NotificationUtility;
 use App\Models\CombinedOrder;
 use App\Http\Controllers\AffiliateController;
+use App\Services\DeliveryAvailabilityService;
 
 class OrderController extends Controller
 {
@@ -29,6 +30,15 @@ class OrderController extends Controller
                 'result' => false,
                 'message' => translate('Cart is Empty')
             ]);
+        }
+
+        $deliveryAvailability = new DeliveryAvailabilityService();
+        if (!$deliveryAvailability->validateCartForDelivery($cartItems)) {
+            return response()->json([
+                'combined_order_id' => 0,
+                'result' => false,
+                'message' => $deliveryAvailability->unavailableMessage()
+            ], 422);
         }
 
         $user = User::find(auth()->user()->id);
