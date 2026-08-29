@@ -1,0 +1,69 @@
+{
+    "name": "aniket-in/laravel-shiprocket",
+    "description": "Shiprocket API Wrapper for Laravel",
+    "keywords": [
+        "Aniket-IN",
+        "laravel",
+        "laravel-shiprocket"
+    ],
+    "homepage": "https://github.com/aniket-in/laravel-shiprocket",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Aniket Das",
+            "email": "aniket.das.in@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.3|^8.0",
+        "spatie/laravel-package-tools": "^1.9.2"
+    },
+    "require-dev": {
+        "nunomaduro/collision": "^6.0",
+        "nunomaduro/larastan": "^2.0.1",
+        "orchestra/testbench": "^7.0",
+        "pestphp/pest": "^1.21",
+        "pestphp/pest-plugin-laravel": "^1.1",
+        "phpstan/extension-installer": "^1.1",
+        "phpstan/phpstan-deprecation-rules": "^1.0",
+        "phpstan/phpstan-phpunit": "^1.0",
+        "phpunit/phpunit": "^9.5",
+        "spatie/laravel-ray": "^1.26"
+    },
+    "autoload": {
+        "psr-4": {
+            "AniketIN\\Shiprocket\\": "src",
+            "AniketIN\\Shiprocket\\Database\\Factories\\": "database/factories"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AniketIN\\Shiprocket\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AniketIN\\Shiprocket\\ShiprocketServiceProvider"
+            ],
+            "aliases": {
+                "Shiprocket": "AniketIN\\Shiprocket\\Facades\\Shiprocket"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

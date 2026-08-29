@@ -1,0 +1,542 @@
+#map {
+    width: 100%;
+    height: 250px;
+}
+
+#edit_map {
+    width: 100%;
+    height: 250px;
+}
+
+.preloader {
+    align-items: center;
+    background: #FFF;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    left: 0;
+    position: fixed;
+    top: 0;
+    transition: opacity 0.2s linear;
+    width: 100%;
+    z-index: 9999;
+    opacity: 1;
+    transform: opacity 1s linear;
+}
+
+.pac-container {
+    z-index: 100000;
+}
+
+.tooltip-inner {
+    max-width: 400px !important;
+}
+
+.wa-chat-box-poweredby {
+    display: none !important;
+}
+
+#wa-widget-send-button {
+    margin: 0 5px 60px 0 !important;
+    width: 50px !important;
+    overflow: hidden !important;
+    padding-left: 5px !important;
+    display: inline-block !important;
+    transition: transform 0.6s ease;
+    transform: translateX(0px);
+}
+
+#wa-widget-send-button:hover {
+    width: 200px !important;
+    padding-left: 15px !important;
+    display: flex !important;
+    transform: translateX(-10px);
+}
+
+.bg-logo-lb {
+    background: url(../img/bg.png);
+    background-position: -208px 174px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-blend-mode: luminosity;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.bg-logo-rt {
+    background: url(../img/bg.png);
+    background-position: 1120px -165px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-blend-mode: luminosity;
+    width: 97.8%;
+    height: 100%;
+    position: absolute;
+
+}
+
+.floating-buttons-section {
+    background: transparent;
+    height: auto;
+    overflow: hidden;
+    z-index: 1046;
+    position: fixed;
+    top: 50%;
+    left: 0;
+    right: auto;
+    padding: 30px;
+    transform: translate(0%, -50%);
+    transition: all 0.4s;
+    overflow: visible;
+}
+
+.aiz-floating-button {
+    margin-bottom: 12px;
+    transition: all 0.8s;
+}
+
+.aiz-floating-button a {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    outline: none;
+    border: 0;
+    vertical-align: middle;
+    text-decoration: none;
+    padding: 0;
+    font-size: 16px;
+    width: auto;
+    height: 50px;
+    border-radius: 25px;
+    color: #fff;
+    overflow: hidden;
+    box-shadow: 0px 10px 30px rgba(105, 105, 105, 0.5);
+}
+
+.aiz-floating-button a .circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+    background: var(--primary);
+    transition: all 0.8s cubic-bezier(0.65, 0, .076, 1);
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    overflow: hidden;
+}
+
+.aiz-floating-button a .text {
+    transition: all 0.7s cubic-bezier(0.65, 0, .076, 1);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 20px;
+    margin: 0 0 0 -25rem;
+    font-size: 16px;
+    color: var(--white);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: -1;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.footer-widget {
+    background: url('../img/footer-bg.webp') no-repeat right top;
+    background-size: contain;
+}
+
+.sticky-top ul li.active {
+    background: #bb1b16;
+    /* #ed3833 */
+    color: #fff;
+}
+
+.breadcrumb-book {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 11;
+}
+
+.breadcrumb-book .breadcrumb-item+.breadcrumb-item::before {
+    content: "";
+}
+
+@media (max-width: 991px) {
+    .breadcrumb-book {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (min-width: 992px) {
+    .breadcrumb-book .breadcrumb-item+.breadcrumb-item::before {
+        content: "|";
+        padding-right: .1rem;
+        color: #6c757d;
+    }
+}
+
+.breadcrumb-book .breadcrumb-item+.breadcrumb-item {
+    display: inline-block;
+    padding-right: .1rem;
+}
+
+.breadcrumb-book .breadcrumb-item {
+    position: relative;
+    padding-bottom: 20px;
+    z-index: 9;
+}
+
+.breadcrumb-book .breadcrumb-item:hover .product-nav-item-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0px);
+    pointer-events: auto;
+}
+
+.breadcrumb-book .prev-book-navigation .product-nav-item-content {
+    left: 0;
+}
+
+.breadcrumb-book .product-nav-item-content {
+    position: absolute;
+    top: 100%;
+    display: flex;
+    opacity: 0;
+    visibility: hidden;
+    box-shadow: 0px 10px 10px -5px #ddd;
+    pointer-events: none;
+    transform: translateY(10px);
+}
+
+.breadcrumb-book .product-nav-item-link {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    z-index: 5;
+    background-color: transparent;
+}
+
+.breadcrumb-book .product-nav-item-content img {
+    max-width: 60px;
+    -o-object-fit: cover;
+    object-fit: cover;
+}
+
+.breadcrumb-book .product-nav-item-content .product-nav-item-inner {
+    flex-grow: 1;
+    min-width: 150px;
+    background-color: #fff;
+    padding: 10px 15px;
+}
+
+.breadcrumb-book .product-nav-item-title {
+    margin: 0;
+    line-height: 1.2em;
+    font-size: 1em;
+    margin-bottom: 5px;
+}
+
+.breadcrumb-book .product-nav-item-price {
+    white-space: nowrap;
+}
+
+.breadcrumb-book .next-book-navigation .product-nav-item-content {
+    right: 0;
+    text-align: right;
+}
+
+.breadcrumb-book .breadcrumb-item svg {
+    margin-top: -2px;
+}
+
+ins {
+    text-decoration: none;
+    word-break: normal;
+}
+
+.shadow-sm {
+    box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075) !important;
+}
+
+.layout-bg {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    /*background: url(../img/bg.png) center center no-repeat;*/
+    opacity: 0.2;
+}
+
+.gap-6 {
+    gap: .5rem;
+}
+
+.gap-2 {
+    gap: .5rem;
+}
+
+.gap-3 {
+    gap: .75rem;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.w-\[62px\] {
+    width: 62px;
+}
+
+.text-secondary-black {
+    --tw-text-opacity: 1;
+    color: rgb(37 45 52 / var(--tw-text-opacity));
+}
+
+.tracking-normal {
+    letter-spacing: 0;
+}
+
+.font-normal {
+    font-weight: 400;
+}
+
+.text-small {
+    font-size: 10px;
+}
+
+.font-manrope {
+    font-family: Manrope, sans-serif;
+}
+
+.w-8 {
+    width: 2rem;
+}
+
+.h-8 {
+    height: 2rem;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.delivery-input-box {
+    position: relative;
+    width: 100%;
+}
+
+.delivery-input-box>input {
+    border-radius: 21px;
+    overflow: hidden;
+    height: 60px;
+    padding-right: 120px !important;
+}
+
+.delivery-input-box>button {
+    position: absolute;
+    right: 10px;
+    top: 9px;
+    width: 100px !important;
+    border-radius: 22px !important;
+}
+
+.btn.disabled,
+.btn:disabled {
+    cursor: not-allowed;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.tracking-detail {
+    padding: 3rem 0
+}
+
+#tracking {
+    margin-bottom: 1rem
+}
+
+[class*=tracking-status-] p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #fff;
+    text-transform: uppercase;
+    text-align: center
+}
+
+[class*=tracking-status-] {
+    padding: 1.6rem 0
+}
+
+.tracking-status-intransit {
+    background-color: #65aee0
+}
+
+.tracking-status-outfordelivery {
+    background-color: #f5a551
+}
+
+.tracking-status-deliveryoffice {
+    background-color: #f7dc6f
+}
+
+.tracking-status-delivered {
+    background-color: #4cbb87
+}
+
+.tracking-status-attemptfail {
+    background-color: #b789c7
+}
+
+.tracking-status-error,
+.tracking-status-exception {
+    background-color: #d26759
+}
+
+.tracking-status-expired {
+    background-color: #616e7d
+}
+
+.tracking-status-pending {
+    background-color: #ccc
+}
+
+.tracking-status-inforeceived {
+    background-color: #214977
+}
+
+.tracking-list {
+    border: 1px solid #e5e5e5
+}
+
+.tracking-item {
+    border-left: 1px solid #e5e5e5;
+    position: relative;
+    padding: 2rem 1.5rem .5rem 2.5rem;
+    font-size: .9rem;
+    margin-left: 3rem;
+    min-height: 5rem
+}
+
+.tracking-item:last-child {
+    padding-bottom: 4rem
+}
+
+.tracking-item .tracking-date {
+    margin-bottom: .5rem
+}
+
+.tracking-item .tracking-date span {
+    color: #888;
+    font-size: 85%;
+    padding-left: .4rem
+}
+
+.tracking-item .tracking-content {
+    padding: .5rem .8rem;
+    background-color: #f4f4f4;
+    border-radius: .5rem
+}
+
+.tracking-item .tracking-content span {
+    display: block;
+    color: #888;
+    font-size: 85%
+}
+
+.tracking-item .tracking-icon {
+    line-height: 2.6rem;
+    position: absolute;
+    left: -1.3rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    background-color: #fff;
+    color: #fff
+}
+
+.tracking-item .tracking-icon.status-sponsored {
+    background-color: #f68
+}
+
+.tracking-item .tracking-icon.status-delivered {
+    background-color: #4cbb87
+}
+
+.tracking-item .tracking-icon.status-outfordelivery {
+    background-color: #f5a551
+}
+
+.tracking-item .tracking-icon.status-deliveryoffice {
+    background-color: #f7dc6f
+}
+
+.tracking-item .tracking-icon.status-attemptfail {
+    background-color: #b789c7
+}
+
+.tracking-item .tracking-icon.status-exception {
+    background-color: #d26759
+}
+
+.tracking-item .tracking-icon.status-inforeceived {
+    background-color: #214977
+}
+
+.tracking-item .tracking-icon.status-intransit {
+    color: #e5e5e5;
+    border: 1px solid #e5e5e5;
+    font-size: .6rem
+}
+
+@media(min-width:992px) {
+    .tracking-item {
+        margin-left: 10rem
+    }
+
+    .tracking-item .tracking-date {
+        position: absolute;
+        left: -10rem;
+        width: 7.5rem;
+        text-align: right
+    }
+
+    .tracking-item .tracking-date span {
+        display: block
+    }
+
+    .tracking-item .tracking-content {
+        padding: 0;
+        background-color: transparent
+    }
+    .sticky-top-lg {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 150px;
+    }
+
+    .gap-6 {
+        gap: 1.5rem;
+    }
+}

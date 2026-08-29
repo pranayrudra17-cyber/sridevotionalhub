@@ -1,0 +1,29 @@
+SELECT * from orders o
+JOIN order_details od 
+    ON o.id = od.order_id
+JOIN (
+    SELECT DISTINCT order_id
+    FROM order_details
+    WHERE product_id = 479
+      AND payment_status = 'paid'
+      AND delivery_status = 'pending'
+      AND created_at >= '2025-08-23'
+) t ON o.id = t.order_id;
+
+
+
+
+UPDATE orders o
+JOIN order_details od 
+    ON o.id = od.order_id
+JOIN (
+    SELECT DISTINCT order_id
+    FROM order_details
+    WHERE product_id = 479
+      AND payment_status = 'paid'
+      AND delivery_status = 'pending'
+      AND created_at >= '2025-08-23'
+) t ON o.id = t.order_id
+SET 
+    o.delivery_status = 'confirmed',
+    od.delivery_status = 'confirmed';
