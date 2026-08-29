@@ -311,6 +311,15 @@
                     </li>
                 @endcanany
 
+                @if(Auth::check() && (Auth::user()->user_type == 'admin' || Auth::user()->user_type == 'staff'))
+                    <li class="aiz-side-nav-item">
+                        <a href="{{ route('admin.product.scan') }}" class="aiz-side-nav-link {{ areActiveRoutes(['admin.product.scan'])}}">
+                            <i class="las la-qrcode aiz-side-nav-icon"></i>
+                            <span class="aiz-side-nav-text">{{translate('Scan Product QR')}}</span>
+                        </a>
+                    </li>
+                @endif
+
                 <!-- Deliver Boy Addon-->
                 @if (addon_is_activated('delivery_boy'))
                     @canany(['view_all_delivery_boy','add_delivery_boy','delivery_boy_payment_history','collected_histories_from_delivery_boy','order_cancle_request_by_delivery_boy','delivery_boy_configuration'])

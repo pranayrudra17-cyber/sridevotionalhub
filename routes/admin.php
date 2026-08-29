@@ -31,6 +31,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PickupPointController;
 use App\Http\Controllers\ProductBulkUploadController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductDeliveryScanController;
 use App\Http\Controllers\ProductQueryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
@@ -66,6 +67,10 @@ Route::controller(UpdateController::class)->group(function () {
 
 Route::get('/admin', [AdminController::class, 'admin_dashboard'])->name('admin.dashboard')->middleware(['auth', 'admin']);
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function() {
+    Route::get('/product/scan', [ProductDeliveryScanController::class, 'scanner'])->name('admin.product.scan');
+    Route::post('/product/scan-delivery', [ProductDeliveryScanController::class, 'scanDelivery'])
+        ->middleware('throttle:20,1')
+        ->name('admin.product.scan.delivery');
     
     // category
     Route::resource('categories', CategoryController::class);

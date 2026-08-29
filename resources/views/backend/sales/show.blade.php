@@ -189,6 +189,7 @@
                                 <th data-breakpoints="lg" class="min-col">#</th>
                                 <th width="10%">{{ translate('Photo') }}</th>
                                 <th class="text-uppercase">{{ translate('Description') }}</th>
+                                <th data-breakpoints="lg" class="text-uppercase text-center">{{ translate('Item QR') }}</th>
                                 <th data-breakpoints="lg" class="text-uppercase">{{ translate('Delivery Type') }}</th>
                                 <th data-breakpoints="lg" class="min-col text-uppercase text-center">
                                     {{ translate('Qty') }}
@@ -245,6 +246,12 @@
                                         @else
                                             <strong>{{ translate('Product Unavailable') }}</strong>
                                         @endif
+                                    </td>
+                                    <td class="text-center">
+                                        @php
+                                            $removedXML = '<?xml version="1.0" encoding="UTF-8"?>';
+                                        @endphp
+                                        {!! str_replace($removedXML, '', QrCode::size(70)->generate($orderDetail->deliveryQrToken())) !!}
                                     </td>
                                     <td>
                                         @if ($order->shipping_type != null && $order->shipping_type == 'home_delivery')

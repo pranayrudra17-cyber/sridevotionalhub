@@ -372,6 +372,10 @@ class OrderController extends Controller
         if (Auth::user()->user_type == 'seller') {
             foreach ($order->orderDetails->where('seller_id', Auth::user()->id) as $key => $orderDetail) {
                 $orderDetail->delivery_status = $request->status;
+                if ($request->status == 'delivered' && empty($orderDetail->delivered_at)) {
+                    $orderDetail->delivered_at = now();
+                    $orderDetail->delivered_by = Auth::id();
+                }
                 $orderDetail->save();
 
                 if ($request->status == 'cancelled') {
@@ -396,6 +400,10 @@ class OrderController extends Controller
             foreach ($order->orderDetails as $key => $orderDetail) {
 
                 $orderDetail->delivery_status = $request->status;
+                if ($request->status == 'delivered' && empty($orderDetail->delivered_at)) {
+                    $orderDetail->delivered_at = now();
+                    $orderDetail->delivered_by = Auth::id();
+                }
                 $orderDetail->save();
 
                 if ($request->status == 'cancelled') {
