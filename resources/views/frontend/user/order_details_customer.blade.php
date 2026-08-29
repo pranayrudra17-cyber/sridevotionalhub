@@ -6,6 +6,15 @@
             <div class="col-md-6">
                 <h1 class="h3">{{ translate('Order id') }}: {{ $order->code }}</h1>
             </div>
+            <div class="col-md-6 text-md-right mt-3 mt-md-0">
+                @php
+                    $removedXML = '<?xml version="1.0" encoding="UTF-8"?>';
+                @endphp
+                <div class="d-inline-block text-center">
+                    {!! str_replace($removedXML, '', QrCode::size(100)->generate($order->code)) !!}
+                    <div class="fs-12 text-muted mt-1">{{ translate('Order QR') }}</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -93,6 +102,7 @@
                             <tr>
                                 <th>#</th>
                                 <th width="30%">{{ translate('Product') }}</th>
+                                <th>{{ translate('QR Code') }}</th>
                                 <th data-breakpoints="md">{{ translate('Variation') }}</th>
                                 <th>{{ translate('Quantity') }}</th>
                                 <th data-breakpoints="md">{{ translate('Delivery Type') }}</th>
@@ -117,6 +127,12 @@
                                         @else
                                             <strong>{{ translate('Product Unavailable') }}</strong>
                                         @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $removedXML = '<?xml version="1.0" encoding="UTF-8"?>';
+                                        @endphp
+                                        {!! str_replace($removedXML, '', QrCode::size(70)->generate($orderDetail->deliveryQrToken())) !!}
                                     </td>
                                     <td>
                                         {{ $orderDetail->variation }}
