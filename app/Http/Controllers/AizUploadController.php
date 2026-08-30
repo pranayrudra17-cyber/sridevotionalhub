@@ -8,6 +8,7 @@ use Response;
 use Auth;
 use Storage;
 use Image;
+use Cache;
 
 class AizUploadController extends Controller
 {
@@ -217,10 +218,12 @@ class AizUploadController extends Controller
                 unlink(public_path().'/'.$upload->file_name);
             }
             $upload->delete();
+            Cache::forget('upload_url_' . $id);
             flash(translate('File deleted successfully'))->success();
         }
         catch(\Exception $e){
             $upload->delete();
+            Cache::forget('upload_url_' . $id);
             flash(translate('File deleted successfully'))->success();
         }
         return back();

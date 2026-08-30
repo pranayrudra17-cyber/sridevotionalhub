@@ -23,13 +23,14 @@
                             else{
                                 $locale = 'en';
                             }
+                            $currentNavLanguage = get_language($locale);
                         @endphp
                         <a href="javascript:void(0)" class="dropdown-toggle text-reset py-2" data-toggle="dropdown" data-display="static">
-                            <img src="{{ static_asset('assets/img/placeholder.jpg') }}" data-src="{{ static_asset('assets/img/flags/'.$locale.'.png') }}" class="mr-2 lazyload" alt="{{ \App\Models\Language::where('code', $locale)->first()->name }}" height="11">
-                            <span class="opacity-100">{{ \App\Models\Language::where('code', $locale)->first()->name }}</span>
+                            <img src="{{ static_asset('assets/img/placeholder.jpg') }}" data-src="{{ static_asset('assets/img/flags/'.$locale.'.png') }}" class="mr-2 lazyload" alt="{{ $currentNavLanguage ? $currentNavLanguage->name : $locale }}" height="11">
+                            <span class="opacity-100">{{ $currentNavLanguage ? $currentNavLanguage->name : $locale }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-left">
-                            @foreach (\App\Models\Language::where('status', 1)->get() as $key => $language)
+                            @foreach (get_active_languages() as $key => $language)
                                 <li>
                                     <a href="javascript:void(0)" data-flag="{{ $language->code }}" class="dropdown-item @if($locale == $language) active @endif">
                                         <img src="{{ static_asset('assets/img/placeholder.jpg') }}" data-src="{{ static_asset('assets/img/flags/'.$language->code.'.png') }}" class="mr-1 lazyload" alt="{{ $language->name }}" height="11">
@@ -48,14 +49,15 @@
                                 $currency_code = Session::get('currency_code');
                             }
                             else{
-                                $currency_code = \App\Models\Currency::findOrFail(get_setting('system_default_currency'))->code;
+                                $currency_code = get_system_default_currency()->code;
                             }
+                            $currentCurrency = get_currency_by_code($currency_code);
                         @endphp
                         <a href="javascript:void(0)" class="dropdown-toggle text-reset py-2 opacity-100" data-toggle="dropdown" data-display="static">
-                            {{ \App\Models\Currency::where('code', $currency_code)->first()->name }} {{ (\App\Models\Currency::where('code', $currency_code)->first()->symbol) }}
+                            {{ $currentCurrency ? $currentCurrency->name : $currency_code }} {{ $currentCurrency ? $currentCurrency->symbol : '' }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
-                            @foreach (\App\Models\Currency::where('status', 1)->get() as $key => $currency)
+                            @foreach (get_active_currencies() as $key => $currency)
                                 <li>
                                     <a class="dropdown-item @if($currency_code == $currency->code) active @endif" href="javascript:void(0)" data-currency="{{ $currency->code }}">{{ $currency->name }} ({{ $currency->symbol }})</a>
                                 </li>
@@ -87,9 +89,12 @@
                             <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0 dropdown">
                                 <a class="dropdown-toggle no-arrow text-reset" data-toggle="dropdown" href="javascript:void(0);" role="button" aria-haspopup="false" aria-expanded="false">
                                     <span class="">
-                                        <span class="position-relative d-inline-block">
+                                            @php
+                                                $unreadNotifications = Auth::user()->unreadNotifications()->take(10)->get();
+                                            @endphp
+                                            <span class="position-relative d-inline-block">
                                             <i class="las la-bell fs-18"></i>
-                                            @if(count(Auth::user()->unreadNotifications) > 0)
+                                            @if($unreadNotifications->isNotEmpty())
                                                 <span class="badge badge-sm badge-dot badge-circle badge-primary position-absolute absolute-top-right"></span>
                                             @endif
                                         </span>
@@ -101,7 +106,7 @@
                                     </div>
                                     <div class="px-3 c-scrollbar-light overflow-auto " style="max-height:300px;">
                                         <ul class="list-group list-group-flush" >
-                                            @forelse(Auth::user()->unreadNotifications as $notification)
+                                            @forelse($unreadNotifications as $notification)
                                                 <li class="list-group-item">
                                                     @if($notification->type == 'App\Notifications\OrderNotification')
                                                         @if(Auth::user()->user_type == 'customer')

@@ -47,7 +47,7 @@ class HomeController extends Controller
         });
 
         $todays_deal_products = Cache::rememberForever('todays_deal_products', function () {
-            return filter_products(Product::where('published', 1)->where('digital', 0)->where('todays_deal', '1'))->get();
+            return filter_products(Product::where('published', 1)->where('digital', 0)->where('todays_deal', '1'))->limit(12)->get();
         });
 
         $newest_products = Cache::remember('newest_products', 3600, function () {

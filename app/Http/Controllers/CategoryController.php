@@ -96,6 +96,7 @@ class CategoryController extends Controller
         $category_translation->name = $request->name;
         $category_translation->save();
 
+        clear_category_cache();
         flash(translate('Category has been inserted successfully'))->success();
         return redirect()->route('categories.index');
     }
@@ -192,7 +193,7 @@ class CategoryController extends Controller
         $category_translation->name = $request->name;
         $category_translation->save();
 
-        Cache::forget('featured_categories');
+        clear_category_cache();
         flash(translate('Category has been updated successfully'))->success();
         return back();
     }
@@ -219,7 +220,7 @@ class CategoryController extends Controller
         }
 
         CategoryUtility::delete_category($id);
-        Cache::forget('featured_categories');
+        clear_category_cache();
 
         flash(translate('Category has been deleted successfully'))->success();
         return redirect()->route('categories.index');
@@ -230,7 +231,7 @@ class CategoryController extends Controller
         $category = Category::findOrFail($request->id);
         $category->featured = $request->status;
         $category->save();
-        Cache::forget('featured_categories');
+        clear_category_cache();
         return 1;
     }
 }

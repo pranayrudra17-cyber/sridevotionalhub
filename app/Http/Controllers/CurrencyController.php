@@ -44,6 +44,7 @@ class CurrencyController extends Controller
         $currency->exchange_rate = $request->exchange_rate;
         $currency->status = $currency->status;
         if($currency->save()){
+            clear_currency_cache();
             flash(translate('Currency updated successfully'))->success();
             return redirect()->route('currency.index');
         }
@@ -73,6 +74,7 @@ class CurrencyController extends Controller
         $currency->exchange_rate = $request->exchange_rate;
         $currency->status = '0';
         if($currency->save()){
+            clear_currency_cache();
             flash(translate('Currency updated successfully'))->success();
             return redirect()->route('currency.index');
         }
@@ -92,6 +94,7 @@ class CurrencyController extends Controller
         }
         $currency->status = $request->status;
         $currency->save();
+        clear_currency_cache();
         return 1;
     }
 }

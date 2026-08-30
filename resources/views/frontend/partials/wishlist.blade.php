@@ -2,7 +2,7 @@
     <i class="la la-heart-o la-2x opacity-80"></i>
     <span class="flex-grow-1 ml-1">
         @if(Auth::check())
-            <span class="badge badge-primary badge-inline badge-pill">{{ count(Auth::user()->wishlists)}}</span>
+            <span class="badge badge-primary badge-inline badge-pill">{{ Auth::user()->wishlists()->count() }}</span>
         @else
             <span class="badge badge-primary badge-inline badge-pill">0</span>
         @endif

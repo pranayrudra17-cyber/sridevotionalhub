@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-@if(\App\Models\Language::where('code', Session::get('locale', Config::get('app.locale')))->first()->rtl == 1)
+@php $currentLanguage = get_language(); @endphp
+@if($currentLanguage && $currentLanguage->rtl == 1)
 <html dir="rtl" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 @else
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -38,10 +39,13 @@
         <meta property="fb:app_id" content="{{ env('FACEBOOK_PIXEL_ID') }}">
     @endif
     <link rel="icon" href="{{ uploaded_asset(get_setting('site_icon')) }}">
-    <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i,800,800i&display=swap" rel="stylesheet"> -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat%3A100%2C100italic%2C200%2C200italic%2C300%2C300italic%2Cregular%2Citalic%2C500%2C500italic%2C600%2C600italic%2C700%2C700italic%2C800%2C800italic%2C900%2C900italic%7CNoto+Sans%3Aregular%2Citalic%2C700%2C700italic%7CABeeZee%3Aregular%2Citalic&subset=cyrillic-ext%2Cvietnamese%2Clatin%2Ccyrillic%2Clatin-ext%2Cgreek-ext%2Cgreek%2Cdevanagari&ver=6.3.3" type="text/css" media="all" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="{{ static_asset('assets/css/vendors.css') }}" as="style">
+    <link rel="preload" href="{{ static_asset('assets/css/aiz-core.css') }}" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="{{ static_asset('assets/css/vendors.css') }}">
-    @if(\App\Models\Language::where('code', Session::get('locale', Config::get('app.locale')))->first()->rtl == 1)
+    @if($currentLanguage && $currentLanguage->rtl == 1)
     <link rel="stylesheet" href="{{ static_asset('assets/css/bootstrap-rtl.min.css') }}">
     @endif
     <link rel="stylesheet" href="{{ static_asset('assets/css/aiz-core.css') }}">
@@ -115,8 +119,8 @@
 @endphp
 </head>
 <body>
-    <div class="preloader">
-        <img src="{{ static_asset('assets/img/loader.gif') }}" alt="{{ env('APP_NAME') }}">
+    <div class="preloader" aria-hidden="true">
+        <div class="preloader-spinner"></div>
     </div>
     <div class="aiz-main-wrapper d-flex flex-column" style="background:#fff;">
         <div class="layout-bg d-none"></div>
@@ -493,9 +497,13 @@
                 AIZ.plugins.notify('warning', "{{ translate('Please choose all the options') }}");
             }
         }
-        window.onload = function(){
-            document.querySelector(".preloader").style.display = "none";
-
+        (function(){
+            var preloader = document.querySelector(".preloader");
+            if (preloader) {
+                preloader.style.display = "none";
+            }
+        })();
+        window.addEventListener('load', function(){
             $(function() {
                 var url = 'https://wati-integration-service.clare.ai/ShopifyWidget/shopifyWidget.js?31310';
                 var s = document.createElement('script');
@@ -532,7 +540,7 @@
                 var x = document.getElementsByTagName('script')[0];
                 x.parentNode.insertBefore(s, x);
             });
-        }
+        });
     </script>
     @yield('script')
     @php

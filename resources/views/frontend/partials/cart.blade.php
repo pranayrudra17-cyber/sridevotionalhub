@@ -1,11 +1,11 @@
 @php
 if (auth()->user() != null) {
     $user_id = Auth::user()->id;
-    $cart = \App\Models\Cart::where('user_id', $user_id)->get();
+    $cart = \App\Models\Cart::where('user_id', $user_id)->with('product')->get();
 } else {
     $temp_user_id = Session()->get('temp_user_id');
     if ($temp_user_id) {
-        $cart = \App\Models\Cart::where('temp_user_id', $temp_user_id)->get();
+        $cart = \App\Models\Cart::where('temp_user_id', $temp_user_id)->with('product')->get();
     }
 }
 
@@ -36,7 +36,7 @@ if (auth()->user() != null) {
             @endphp
             @foreach ($cart as $key => $cartItem)
                 @php
-                    $product = \App\Models\Product::find($cartItem['product_id']);
+                    $product = $cartItem->product;
                     // $total = $total + ($cartItem['price'] + $cartItem['tax']) * $cartItem['quantity'];
                     $total = $total + cart_product_price($cartItem, $product, false) * $cartItem['quantity'];
                 @endphp

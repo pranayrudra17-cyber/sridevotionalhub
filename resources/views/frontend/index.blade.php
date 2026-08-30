@@ -14,17 +14,19 @@
                     @if (get_setting('home_slider_images') != null)
                         <div class="aiz-carousel dots-inside-bottom mobile-img-auto-height" data-arrows="true" data-dots="true" data-autoplay="true" data-infinite="true">
                             @php $slider_images = json_decode(get_setting('home_slider_images'), true);  @endphp
+                            @php $slider_links = json_decode(get_setting('home_slider_links'), true); @endphp
                             @foreach ($slider_images as $key => $value)
                                 <div class="carousel-box">
-                                    <a href="{{ json_decode(get_setting('home_slider_links'), true)[$key] }}">
+                                    <a href="{{ $slider_links[$key] ?? '#' }}">
                                         <img
                                             class="d-block mw-100 img-fluid rounded shadow-sm overflow-hidden"
                                             src="{{ uploaded_asset($slider_images[$key]) }}"
                                             alt="{{ env('APP_NAME')}}"
-                                            @if(count($featured_categories) == 0)
                                             height="457"
+                                            @if($key === 0)
+                                            fetchpriority="high"
                                             @else
-                                            height="457"
+                                            loading="lazy"
                                             @endif
                                             onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';"
                                         >

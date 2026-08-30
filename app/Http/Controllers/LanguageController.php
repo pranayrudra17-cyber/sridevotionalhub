@@ -48,7 +48,7 @@ class LanguageController extends Controller
         $language->app_lang_code = $request->app_lang_code;
         $language->save();   
 
-        Cache::forget('app.languages');
+        clear_language_cache();
 
         flash(translate('Language has been inserted successfully'))->success();
         return redirect()->route('languages.index');
@@ -95,7 +95,7 @@ class LanguageController extends Controller
         $language->app_lang_code = $request->app_lang_code; 
         $language->save();
         
-        Cache::forget('app.languages');
+        clear_language_cache();
 
         flash(translate('Language has been updated successfully'))->success();
         return redirect()->route('languages.index');
@@ -132,6 +132,7 @@ class LanguageController extends Controller
         }
         $language->status = $request->status;
         if($language->save()){
+            clear_language_cache();
             flash(translate('Status updated successfully'))->success();
             return 1;
         }
@@ -143,6 +144,7 @@ class LanguageController extends Controller
         $language = Language::findOrFail($request->id);
         $language->rtl = $request->status;
         if($language->save()){
+            clear_language_cache();
             flash(translate('RTL status updated successfully'))->success();
             return 1;
         }
@@ -162,6 +164,7 @@ class LanguageController extends Controller
                 Session::put('locale', env('DEFAULT_LANGUAGE'));
             }
             Language::destroy($id);
+            clear_language_cache();
             flash(translate('Language has been deleted successfully'))->success();
         }
         return redirect()->route('languages.index');

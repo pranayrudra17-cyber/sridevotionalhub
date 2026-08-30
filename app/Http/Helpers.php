@@ -949,10 +949,16 @@ if (!function_exists('app_timezone')) {
 if (!function_exists('uploaded_asset')) {
     function uploaded_asset($id)
     {
-        if (($asset = \App\Models\Upload::find($id)) != null) {
-            return $asset->external_link == null ? my_asset($asset->file_name) : $asset->external_link;
+        if (!$id) {
+            return static_asset('assets/img/placeholder.jpg');
         }
-        return static_asset('assets/img/placeholder.jpg');
+
+        return Cache::remember('upload_url_' . $id, 86400, function () use ($id) {
+            if (($asset = \App\Models\Upload::find($id)) != null) {
+                return $asset->external_link == null ? my_asset($asset->file_name) : $asset->external_link;
+            }
+            return static_asset('assets/img/placeholder.jpg');
+        });
     }
 }
 
@@ -1417,7 +1423,91 @@ if (!function_exists('get_shipment_tracking_details')) {
 if (!function_exists('get_level_zero_categories')) {
     function get_level_zero_categories()
     {
-        $categories_query = Category::query();
-        return $categories_query->where('digital', 0)->orderBy('order_level', 'asc')->get();
+        return Cache::remember('level_zero_categories', 86400, function () {
+            return Category::where('digital', 0)->where('level', 0)->orderBy('order_level', 'asc')->get();
+        });
+    }
+}
+
+if (!function_exists('get_header_categories')) {
+    function get_header_categories($limit = 11)
+    {
+        return Cache::remember('header_categories_' . $limit, 86400, function () use ($limit) {
+            return Category::where('level', 0)->where('digital', 0)->orderBy('order_level', 'desc')->take($limit)->get();
+        });
+    }
+}
+
+if (!function_exists('clear_category_cache')) {
+    function clear_category_cache()
+    {
+        Cache::forget('featured_categories');
+        Cache::forget('level_zero_categories');
+        Cache::forget('header_categories_11');
+        Cache::forget('header_categories_12');
+        Cache::forget('category_parent_child_ids');
+    }
+}
+
+if (!function_exists('get_all_languages')) {
+    function get_all_languages()
+    {
+        return Cache::remember('all_languages', 86400, function () {
+            return \App\Models\Language::all();
+        });
+    }
+}
+
+if (!function_exists('get_language')) {
+    function get_language($code = null)
+    {
+        $code = $code ?: Session::get('locale', config('app.locale'));
+        return get_all_languages()->firstWhere('code', $code);
+    }
+}
+
+if (!function_exists('get_active_languages')) {
+    function get_active_languages()
+    {
+        return get_all_languages()->where('status', 1);
+    }
+}
+
+if (!function_exists('clear_language_cache')) {
+    function clear_language_cache()
+    {
+        Cache::forget('all_languages');
+        Cache::forget('app.languages');
+    }
+}
+
+if (!function_exists('get_all_currencies')) {
+    function get_all_currencies()
+    {
+        return Cache::remember('all_currencies', 86400, function () {
+            return \App\Models\Currency::all();
+        });
+    }
+}
+
+if (!function_exists('get_currency_by_code')) {
+    function get_currency_by_code($code)
+    {
+        return get_all_currencies()->firstWhere('code', $code);
+    }
+}
+
+if (!function_exists('get_active_currencies')) {
+    function get_active_currencies()
+    {
+        return get_all_currencies()->where('status', 1);
+    }
+}
+
+if (!function_exists('clear_currency_cache')) {
+    function clear_currency_cache()
+    {
+        Cache::forget('all_currencies');
+        Cache::forget('system_default_currency');
     }
 }

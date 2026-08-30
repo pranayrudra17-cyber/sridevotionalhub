@@ -24,6 +24,19 @@
     transform: opacity 1s linear;
 }
 
+.preloader-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #eee;
+    border-top-color: var(--primary, #e62d04);
+    border-radius: 50%;
+    animation: preloader-spin 0.7s linear infinite;
+}
+
+@keyframes preloader-spin {
+    to { transform: rotate(360deg); }
+}
+
 .pac-container {
     z-index: 100000;
 }

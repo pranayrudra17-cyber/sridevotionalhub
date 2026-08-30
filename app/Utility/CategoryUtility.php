@@ -3,6 +3,7 @@
 namespace App\Utility;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryUtility
 {
@@ -17,11 +18,18 @@ class CategoryUtility
 
     public static function get_immediate_children_ids($id, $with_trashed = false)
     {
+        if ($with_trashed) {
+            $children = CategoryUtility::get_immediate_children($id, $with_trashed, true);
+            return !empty($children) ? array_column($children, 'id') : array();
+        }
 
-        $children = CategoryUtility::get_immediate_children($id, $with_trashed, true);
+        $map = Cache::remember('category_parent_child_ids', 86400, function () {
+            return Category::select('id', 'parent_id')->get()->groupBy('parent_id')->map(function ($items) {
+                return $items->pluck('id')->toArray();
+            })->toArray();
+        });
 
-        return !empty($children) ? array_column($children, 'id') : array();
-
+        return $map[$id] ?? array();
     }
 
     public static function get_immediate_children_count($id, $with_trashed = false)
