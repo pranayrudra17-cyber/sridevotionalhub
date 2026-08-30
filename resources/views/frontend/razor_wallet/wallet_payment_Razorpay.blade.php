@@ -1,30 +1,28 @@
 @extends('frontend.layouts.app')
 
 @section('content')
-    @php
-        $seller_package = \App\Models\SellerPackage::findOrFail(Session::get('payment_data')['seller_package_id']);
-    @endphp
 @endsection
 
 @section('script')
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     var options = {
-        "key": "{{ env('RAZOR_KEY') }}", // Enter the Key ID generated from the Dashboard
-        "amount": "{{Session::get('payment_data')['amount']*100}}", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+        "key": "{{ env('RAZOR_KEY') }}",
+        "amount": "{{ (int) round(Session::get('payment_data')['amount'] * 100) }}",
         "currency": "INR",
         "buttontext": "",
-        "name": "{{ env('APP_NAME') }}", //your business name
+        "name": "{{ env('APP_NAME') }}",
         "description": "Wallet Payment",
         "image": "{{ uploaded_asset(get_setting('site_icon')) }}",
+        "order_id": "{{ $razorpayOrder['id'] }}",
         "callback_url": "{{ route('payment.rozer') }}",
-        "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
-            "name": "{{ Auth::user()->name }}", //your customer's name
-            "email": "{{ Auth::user()->email ?? '' }}",
-            // "contact": "9000090000" //Provide the customer's phone number for better conversion rates 
+        "prefill": {
+            "name": "{{ Auth::user()->name }}",
+            "email": "{{ Auth::user()->email ?? '' }}"
         },
         "notes": {
-            "user_id": "{{ auth()->id() }}"
+            "user_id": "{{ auth()->id() }}",
+            "payment_type": "wallet_payment"
         },
         "theme": {
             "color": "{{ get_setting('base_color') }}"
@@ -33,13 +31,30 @@
             "ondismiss": function(){
                 window.location = "{{ route('wallet.index') }}";
             }
+        },
+        "handler": function (response) {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{{ route('payment.rozer') }}";
+            ['razorpay_payment_id', 'razorpay_order_id', 'razorpay_signature'].forEach(function (key) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = response[key];
+                form.appendChild(input);
+            });
+            document.body.appendChild(form);
+            form.submit();
         }
     };
-    var rzp1 = new Razorpay(options);   
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response) {
+        var desc = (response.error && response.error.description) ? response.error.description : 'failed';
+        window.location = "{{ route('payment.rozer.fail') }}?reason=" + encodeURIComponent(desc);
+    });
 
     $(document).ready(function(e) {
         rzp1.open();
-        // e.preventDefault();
     });
     $('#modal-close').click(function(){
         window.location = "{{ route('wallet.index') }}";

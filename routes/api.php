@@ -195,6 +195,7 @@ Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function() {
     Route::get('razorpay/cancel', 'App\Http\Controllers\Api\V2\RazorpayController@cancel')->name('api.razorpay.cancel');
     Route::any('razorpay/payment', 'App\Http\Controllers\Api\V2\RazorpayController@payment')->name('api.razorpay.payment');
     Route::post('razorpay/success', 'App\Http\Controllers\Api\V2\RazorpayController@success')->name('api.razorpay.success');
+    Route::post('razorpay/webhook', 'App\Http\Controllers\Api\V2\RazorpayController@webhook')->name('api.razorpay.webhook');
 
     Route::any('paystack/init', 'App\Http\Controllers\Api\V2\PaystackController@init')->name('api.paystack.init');
     Route::post('paystack/success', 'App\Http\Controllers\Api\V2\PaystackController@success')->name('api.paystack.success');

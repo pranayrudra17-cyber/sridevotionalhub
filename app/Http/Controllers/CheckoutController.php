@@ -101,9 +101,19 @@ class CheckoutController extends Controller
 
         foreach ($combined_order->orders as $key => $order) {
             $order = Order::findOrFail($order->id);
+            $already_paid = ($order->payment_status == 'paid');
             $order->payment_status = 'paid';
             $order->payment_details = $payment;
             $order->save();
+
+            foreach ($order->orderDetails as $orderDetail) {
+                $orderDetail->payment_status = 'paid';
+                $orderDetail->save();
+            }
+
+            if ($already_paid) {
+                continue;
+            }
 
             calculateCommissionAffilationClubPoint($order);
         }

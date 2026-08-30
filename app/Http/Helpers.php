@@ -956,6 +956,17 @@ if (!function_exists('uploaded_asset')) {
     }
 }
 
+if (!function_exists('public_url_prefix')) {
+    /**
+     * Apache/XAMPP serves the project root, so assets live under /public.
+     * php artisan serve already uses public/ as the document root.
+     */
+    function public_url_prefix()
+    {
+        return php_sapi_name() === 'cli-server' ? '' : 'public/';
+    }
+}
+
 if (!function_exists('my_asset')) {
     /**
      * Generate an asset path for the application.
@@ -969,8 +980,7 @@ if (!function_exists('my_asset')) {
         if (env('FILESYSTEM_DRIVER') == 's3') {
             return Storage::disk('s3')->url($path);
         } else {
-            // return app('url')->asset($path, $secure);
-            return app('url')->asset('public/' . $path, $secure);
+            return app('url')->asset(public_url_prefix() . $path, $secure);
         }
     }
 }
@@ -985,8 +995,7 @@ if (!function_exists('static_asset')) {
      */
     function static_asset($path, $secure = null)
     {
-        // return app('url')->asset($path, $secure);
-        return app('url')->asset('public/' . $path, $secure);
+        return app('url')->asset(public_url_prefix() . $path, $secure);
     }
 }
 
@@ -1015,7 +1024,7 @@ if (!function_exists('getFileBaseURL')) {
         if (env('FILESYSTEM_DRIVER') == 's3') {
             return env('AWS_URL') . '/';
         } else {
-            return getBaseURL() . 'public/';
+            return getBaseURL() . public_url_prefix();
         }
     }
 }
@@ -1136,11 +1145,25 @@ if (!function_exists('checkout_done')) {
     function checkout_done($combined_order_id, $payment)
     {
         $combined_order = CombinedOrder::find($combined_order_id);
+        if ($combined_order == null) {
+            return;
+        }
 
         foreach ($combined_order->orders as $key => $order) {
+            $already_paid = ($order->payment_status == 'paid');
+
             $order->payment_status = 'paid';
             $order->payment_details = $payment;
             $order->save();
+
+            foreach ($order->orderDetails as $orderDetail) {
+                $orderDetail->payment_status = 'paid';
+                $orderDetail->save();
+            }
+
+            if ($already_paid) {
+                continue;
+            }
             
             if((get_setting('shipment') == 1) && ( $order->shipping_type != 'pickup_point'))
                 (new ShiprocketController)->order_create($order); // Added by Pranay Rudra
@@ -1158,6 +1181,21 @@ if (!function_exists('checkout_done')) {
 if (!function_exists('wallet_payment_done')) {
     function wallet_payment_done($user_id, $amount, $payment_method, $payment_details)
     {
+        if (!empty($payment_details)) {
+            $decoded = is_array($payment_details) ? $payment_details : json_decode($payment_details, true);
+            $gateway_payment_id = null;
+            if (is_array($decoded)) {
+                if (!empty($decoded['razorpay_payment_id'])) {
+                    $gateway_payment_id = $decoded['razorpay_payment_id'];
+                } elseif (!empty($decoded['id']) && strpos($decoded['id'], 'pay_') === 0) {
+                    $gateway_payment_id = $decoded['id'];
+                }
+            }
+            if (!empty($gateway_payment_id) && Wallet::where('payment_details', 'like', '%' . $gateway_payment_id . '%')->exists()) {
+                return;
+            }
+        }
+
         $user = \App\Models\User::find($user_id);
         $user->balance = $user->balance + $amount;
         $user->save();
@@ -1166,7 +1204,7 @@ if (!function_exists('wallet_payment_done')) {
         $wallet->user_id = $user->id;
         $wallet->amount = $amount;
         $wallet->payment_method = $payment_method;
-        $wallet->payment_details = $payment_details;
+        $wallet->payment_details = is_array($payment_details) ? json_encode($payment_details) : $payment_details;
         $wallet->save();
     }
 }
