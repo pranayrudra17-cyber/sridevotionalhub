@@ -540,3 +540,97 @@ ins {
         gap: 1.5rem;
     }
 }
+
+/* Purchase history order details - mobile */
+.aiz-user-panel {
+    min-width: 0;
+}
+
+.order-details-customer {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.order-details-customer .order-product-name {
+    word-break: break-word;
+}
+
+.order-details-customer .order-summary-table,
+.order-details-customer .order-amount-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.order-details-customer .order-summary-table td,
+.order-details-customer .order-amount-table td {
+    word-break: break-word;
+    white-space: normal;
+    vertical-align: top;
+}
+
+@media (max-width: 767.98px) {
+    .order-details-customer .aiz-titlebar h1 {
+        font-size: 1.125rem;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+
+    .order-details-customer .order-qr-wrap svg {
+        width: 72px;
+        height: 72px;
+    }
+
+    .order-details-customer .card .card-header {
+        flex-wrap: wrap;
+        padding: 12px 16px;
+    }
+
+    .order-details-customer .card .card-body {
+        padding: 16px;
+        overflow-x: auto;
+    }
+
+    .order-details-customer .order-summary-table td.w-50 {
+        width: 42% !important;
+    }
+
+    .order-details-customer .aiz-table td,
+    .order-details-customer .aiz-table th {
+        padding: 0.65rem 0.5rem;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .order-details-customer .item-qr svg {
+        width: 56px;
+        height: 56px;
+    }
+
+    .order-details-customer .col-md-3 {
+        margin-top: 1rem;
+    }
+
+    .order-details-customer .btn {
+        white-space: normal;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .order-details-customer .order-summary-table tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0.75rem;
+    }
+
+    .order-details-customer .order-summary-table td,
+    .order-details-customer .order-summary-table td.w-50 {
+        width: 100% !important;
+        display: block;
+        padding: 0.15rem 0;
+    }
+
+    .order-details-customer .order-summary-table td.fw-600,
+    .order-details-customer .order-summary-table td.text-bold {
+        padding-bottom: 0;
+    }
+}

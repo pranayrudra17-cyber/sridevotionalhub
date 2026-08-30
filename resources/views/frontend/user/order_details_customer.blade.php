@@ -1,6 +1,7 @@
 @extends('frontend.layouts.user_panel')
 
 @section('panel_content')
+<div class="order-details-customer">
     <div class="aiz-titlebar mt-2 mb-4">
         <div class="row align-items-center">
             <div class="col-md-6">
@@ -10,7 +11,7 @@
                 @php
                     $removedXML = '<?xml version="1.0" encoding="UTF-8"?>';
                 @endphp
-                <div class="d-inline-block text-center">
+                <div class="d-inline-block text-center order-qr-wrap">
                     {!! str_replace($removedXML, '', QrCode::size(100)->generate($order->code)) !!}
                     <div class="fs-12 text-muted mt-1">{{ translate('Order QR') }}</div>
                 </div>
@@ -26,7 +27,7 @@
             <div class="row">
 
                 <div class="col-lg-6">
-                    <table class="table-borderless table">
+                    <table class="table-borderless table order-summary-table">
                         <tr>
                             <td class="w-50 fw-600">{{ translate('Order Code') }}:</td>
                             <td>{{ $order->code }}</td>
@@ -51,7 +52,7 @@
                     </table>
                 </div>
                 <div class="col-lg-6">
-                    <table class="table-borderless table">
+                    <table class="table-borderless table order-summary-table">
                         <tr>
                             <td class="w-50 fw-600">{{ translate('Order date') }}:</td>
                             <td>{{ date('d-m-Y H:i A', $order->date) }}</td>
@@ -100,11 +101,11 @@
                     <table class="aiz-table table">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th width="30%">{{ translate('Product') }}</th>
-                                <th>{{ translate('QR Code') }}</th>
+                                <th data-breakpoints="md">#</th>
+                                <th>{{ translate('Product') }}</th>
+                                <th data-breakpoints="sm">{{ translate('QR Code') }}</th>
                                 <th data-breakpoints="md">{{ translate('Variation') }}</th>
-                                <th>{{ translate('Quantity') }}</th>
+                                <th data-breakpoints="sm">{{ translate('Quantity') }}</th>
                                 <th data-breakpoints="md">{{ translate('Delivery Type') }}</th>
                                 <th>{{ translate('Price') }}</th>
                                 @if (addon_is_activated('refund_request'))
@@ -119,7 +120,7 @@
                                     <td>{{ $key + 1 }}</td>
                                     <td>
                                         @if ($orderDetail->product != null && $orderDetail->product->auction_product == 0)
-                                            <a href="{{ route((($orderDetail->product->digital == 1)?'astrology':(($orderDetail->product->digital == 2)?'pooja':'product')), $orderDetail->product->slug) }}"
+                                            <a class="order-product-name" href="{{ route((($orderDetail->product->digital == 1)?'astrology':(($orderDetail->product->digital == 2)?'pooja':'product')), $orderDetail->product->slug) }}"
                                                 target="_blank">{{ $orderDetail->product->getTranslation('name') }}</a>
                                         @elseif($orderDetail->product != null && $orderDetail->product->auction_product == 1)
                                             <a href="{{ route('auction-product', $orderDetail->product->slug) }}"
@@ -132,7 +133,7 @@
                                         @php
                                             $removedXML = '<?xml version="1.0" encoding="UTF-8"?>';
                                         @endphp
-                                        {!! str_replace($removedXML, '', QrCode::size(70)->generate($orderDetail->deliveryQrToken())) !!}
+                                        <span class="item-qr">{!! str_replace($removedXML, '', QrCode::size(70)->generate($orderDetail->deliveryQrToken())) !!}</span>
                                     </td>
                                     <td>
                                         {{ $orderDetail->variation }}
@@ -212,7 +213,7 @@
                         <b class="fs-15">{{ translate('Order Ammount') }}</b>
                     </div>
                     <div class="card-body pb-0">
-                        <table class="table-borderless table">
+                        <table class="table-borderless table order-amount-table">
                             <tbody>
                                 <tr>
                                     <td class="w-50 fw-600">{{ translate('Subtotal') }}</td>
@@ -258,6 +259,7 @@
             @endif
         </div>
     </div>
+</div>
 @endsection
 
 @section('modal')
