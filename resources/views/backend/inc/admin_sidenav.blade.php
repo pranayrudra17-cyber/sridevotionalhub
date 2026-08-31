@@ -310,7 +310,6 @@
                         </ul>
                     </li>
                 @endcanany
-
                 @if(Auth::check() && (Auth::user()->user_type == 'admin' || Auth::user()->user_type == 'staff'))
                     <li class="aiz-side-nav-item">
                         <a href="{{ route('admin.product.scan') }}" class="aiz-side-nav-link {{ areActiveRoutes(['admin.product.scan'])}}">
@@ -518,12 +517,14 @@
                 @endcanany
 
                 {{-- Uploads Files --}}
+                @if(Auth::user()->roles->first()->id != 3)
                 <li class="aiz-side-nav-item">
                     <a href="{{ route('uploaded-files.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['uploaded-files.create'])}}">
                         <i class="las la-folder-open aiz-side-nav-icon"></i>
                         <span class="aiz-side-nav-text">{{ translate('Uploaded Files') }}</span>
                     </a>
                 </li>
+                @endif
 
                 <!-- Reports -->
                 @canany(['in_house_product_sale_report','seller_products_sale_report','products_stock_report','product_wishlist_report','user_search_report','commission_history_report','wallet_transaction_report'])

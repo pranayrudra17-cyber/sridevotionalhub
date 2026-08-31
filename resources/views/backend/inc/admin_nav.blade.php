@@ -28,6 +28,7 @@
                     </div>
                 </div>
             @endif
+            @if(Auth::user()->roles->first()->id != 3)
             <div class="d-flex justify-content-around align-items-center align-items-stretch ml-3">
                 <div class="aiz-topbar-item">
                     <div class="d-flex align-items-center">
@@ -38,9 +39,11 @@
                     </div>
                 </div>
             </div>
+            @endif
         </div>
         <div class="d-flex justify-content-around align-items-center align-items-stretch">
 
+            @if(Auth::user()->roles->first()->id != 3)
             <div class="aiz-topbar-item ml-2">
                 <div class="align-items-stretch d-flex dropdown">
                     <a class="dropdown-toggle no-arrow" data-toggle="dropdown" href="javascript:void(0);" role="button" aria-haspopup="false" aria-expanded="false">
@@ -121,6 +124,7 @@
                     </ul>
                 </div>
             </div>
+            @endif
 
             <div class="aiz-topbar-item ml-2">
                 <div class="align-items-stretch d-flex dropdown">
