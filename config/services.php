@@ -54,6 +54,12 @@ return [
         'redirect'      => env('APP_URL').'/social-login/twitter/callback',
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'auth_token' => env('TWILIO_AUTH_TOKEN'),
+        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
+    ],
+
     'paytm-wallet' => [
         'env' => env('PAYTM_ENVIRONMENT'),
         'merchant_id' => env('PAYTM_MERCHANT_ID'),

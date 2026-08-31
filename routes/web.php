@@ -47,6 +47,7 @@ use App\Http\Controllers\ProductQueryController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ShiprocketController;
+use App\Http\Controllers\OrderQrImageController;
 
 /*
   |--------------------------------------------------------------------------
@@ -443,6 +444,10 @@ Route::group(['prefix' => 'shipment'], function () {
         // Route::get('/cancel-order/{order_id}', 'cancel_order')->name('shipment.cancel_order');
     });
 });
+
+Route::get('/order-qr/{order}/{signature}.png', [OrderQrImageController::class, 'show'])
+    ->name('order.whatsapp.qr')
+    ->where(array('order' => '[0-9]+', 'signature' => '[a-f0-9]+'));
 
 Route::controller(PageController::class)->group(function () {
     //mobile app balnk page for webview

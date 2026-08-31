@@ -4,10 +4,13 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
+use BaconQrCode\Common\ErrorCorrectionLevel;
+use BaconQrCode\Encoder\Encoder;
 
 class ProductDeliveryQrService
 {
     const TOKEN_PREFIX = 'SDHOD';
+    const WHATSAPP_QR_PREFIX = 'order-whatsapp-qr:';
 
     /**
      * Signed identifier for a specific ordered product (order_details row).
@@ -71,5 +74,78 @@ class ProductDeliveryQrService
             'order' => $order,
             'order_detail' => null,
         );
+    }
+
+    /**
+     * HMAC for the public WhatsApp QR image URL.
+     *
+     * @param int $orderId
+     * @return string
+     */
+    public static function whatsappQrSignature($orderId)
+    {
+        return substr(hash_hmac('sha256', self::WHATSAPP_QR_PREFIX . (int) $orderId, (string) config('app.key')), 0, 20);
+    }
+
+    /**
+     * PNG bytes for a QR payload using the same Bacon encoder as Simple QrCode.
+     *
+     * @param string $payload
+     * @param int $pixelSize
+     * @param int $margin
+     * @return string
+     */
+    public static function pngBinary($payload, $pixelSize = 8, $margin = 4)
+    {
+        $payload = (string) $payload;
+        if ($payload === '') {
+            throw new \RuntimeException('QR payload is empty.');
+        }
+
+        if (!function_exists('imagecreatetruecolor')) {
+            throw new \RuntimeException('GD library is required to generate QR code PNG images.');
+        }
+
+        $qrCode = Encoder::encode($payload, ErrorCorrectionLevel::M());
+        $matrix = $qrCode->getMatrix();
+        $moduleCount = $matrix->getWidth();
+        $size = ($moduleCount + (2 * $margin)) * $pixelSize;
+
+        $image = imagecreatetruecolor($size, $size);
+        if ($image === false) {
+            throw new \RuntimeException('Unable to allocate QR code image.');
+        }
+
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $black = imagecolorallocate($image, 0, 0, 0);
+        imagefill($image, 0, 0, $white);
+
+        for ($y = 0; $y < $moduleCount; $y++) {
+            for ($x = 0; $x < $moduleCount; $x++) {
+                if ($matrix->get($x, $y) !== 1) {
+                    continue;
+                }
+
+                imagefilledrectangle(
+                    $image,
+                    ($x + $margin) * $pixelSize,
+                    ($y + $margin) * $pixelSize,
+                    (($x + $margin + 1) * $pixelSize) - 1,
+                    (($y + $margin + 1) * $pixelSize) - 1,
+                    $black
+                );
+            }
+        }
+
+        ob_start();
+        imagepng($image);
+        $png = ob_get_clean();
+        imagedestroy($image);
+
+        if ($png === false || $png === '') {
+            throw new \RuntimeException('Unable to encode QR code PNG.');
+        }
+
+        return $png;
     }
 }

@@ -963,7 +963,17 @@ if (!function_exists('public_url_prefix')) {
      */
     function public_url_prefix()
     {
-        return php_sapi_name() === 'cli-server' ? '' : 'public/';
+        if (php_sapi_name() === 'cli-server') {
+            return '';
+        }
+
+        $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+        // Front controller is already public/index.php — do not prefix another /public
+        if (preg_match('#/public/index\.php$#', $script)) {
+            return '';
+        }
+
+        return 'public/';
     }
 }
 

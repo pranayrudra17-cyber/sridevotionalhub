@@ -10,6 +10,7 @@ use Mail;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\OrderNotification;
 use App\Models\FirebaseNotification;
+use App\Services\OrderWhatsAppNotificationService;
 
 class NotificationUtility
 {
@@ -39,6 +40,11 @@ class NotificationUtility
             } catch (\Exception $e) {
 
             }
+        }
+
+        try {
+            OrderWhatsAppNotificationService::queueAfterResponse($order);
+        } catch (\Exception $e) {
         }
 
         //sends Notifications to user

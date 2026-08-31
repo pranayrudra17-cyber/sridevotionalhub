@@ -17,6 +17,7 @@ use \App\Utility\NotificationUtility;
 use App\Models\CombinedOrder;
 use App\Http\Controllers\AffiliateController;
 use App\Services\DeliveryAvailabilityService;
+use App\Services\OrderWhatsAppNotificationService;
 
 class OrderController extends Controller
 {
@@ -201,6 +202,12 @@ class OrderController extends Controller
             || $request->payment_type == 'wallet'
             || strpos($request->payment_type, "manual_payment_") !== false // if payment type like  manual_payment_1 or  manual_payment_25 etc
         ) {
+            foreach ($combined_order->orders as $placedOrder) {
+                try {
+                    OrderWhatsAppNotificationService::queueAfterResponse($placedOrder);
+                } catch (\Exception $e) {
+                }
+            }
             NotificationUtility::sendOrderPlacedNotification($order);
         }
 
