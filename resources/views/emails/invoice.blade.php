@@ -173,6 +173,28 @@
 		    </table>
 	    </div>
 
+		@if(!empty($include_delivery_qr))
+		<div style="padding: 1.5rem; padding-top: 0;">
+			<p class="strong" style="margin-bottom: 0.75rem;">{{ translate('Delivery QR Code') }}</p>
+			<p class="gry-color small" style="margin-bottom: 1rem;">{{ translate('Please show this QR code to the delivery person at the time of delivery.') }}</p>
+			@foreach ($order->orderDetails as $orderDetail)
+				@if ($orderDetail->product != null)
+					<table style="margin-bottom: 1.25rem; border: 1px solid #eceff4;">
+						<tr>
+							<td style="padding: 0.9rem;">
+								<p class="strong">{{ $orderDetail->product->getTranslation('name') }} @if($orderDetail->variation != null) ({{ $orderDetail->variation }}) @endif</p>
+								<p class="gry-color small" style="margin: 0.35rem 0 0.75rem;">{{ translate('Quantity') }}: {{ $orderDetail->quantity }}</p>
+								@if(!empty($delivery_qr_pngs[$orderDetail->id]) && isset($message))
+									<img src="{{ $message->embedData($delivery_qr_pngs[$orderDetail->id], 'delivery-qr-'.$orderDetail->id.'.png', 'image/png') }}" alt="{{ translate('Delivery QR Code') }}" width="180" height="180" style="display:block; border: 0;">
+								@endif
+							</td>
+						</tr>
+					</table>
+				@endif
+			@endforeach
+		</div>
+		@endif
+
 	</div>
 </body>
 </html>

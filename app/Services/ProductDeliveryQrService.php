@@ -4,6 +4,10 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
+use BaconQrCode\Common\ErrorCorrectionLevel;
+use BaconQrCode\Encoder\Encoder;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class ProductDeliveryQrService
 {
@@ -71,5 +75,64 @@ class ProductDeliveryQrService
             'order' => $order,
             'order_detail' => null,
         );
+    }
+
+    /**
+     * PNG binary for embedding in customer emails (CID). Uses GD so email
+     * clients receive a real image without a public filesystem URL.
+     *
+     * @param string $payload
+     * @param int $size
+     * @return string|null
+     */
+    public static function pngBinary($payload, $size = 200)
+    {
+        $payload = (string) $payload;
+        if ($payload === '' || !function_exists('imagecreatetruecolor')) {
+            return null;
+        }
+
+        try {
+            $qrCode = Encoder::encode($payload, ErrorCorrectionLevel::M());
+            $matrix = $qrCode->getMatrix();
+            $moduleCount = $matrix->getWidth();
+            $quiet = 2;
+            $modules = $moduleCount + ($quiet * 2);
+            $scale = max(1, (int) floor(((int) $size) / $modules));
+            $pixel = $modules * $scale;
+
+            $image = imagecreatetruecolor($pixel, $pixel);
+            $white = imagecolorallocate($image, 255, 255, 255);
+            $black = imagecolorallocate($image, 0, 0, 0);
+            imagefill($image, 0, 0, $white);
+
+            for ($y = 0; $y < $moduleCount; $y++) {
+                for ($x = 0; $x < $moduleCount; $x++) {
+                    if ((int) $matrix->get($x, $y) === 1) {
+                        imagefilledrectangle(
+                            $image,
+                            ($x + $quiet) * $scale,
+                            ($y + $quiet) * $scale,
+                            (($x + $quiet + 1) * $scale) - 1,
+                            (($y + $quiet + 1) * $scale) - 1,
+                            $black
+                        );
+                    }
+                }
+            }
+
+            ob_start();
+            imagepng($image);
+            $png = ob_get_clean();
+            imagedestroy($image);
+
+            return ($png !== false && $png !== '') ? $png : null;
+        } catch (Exception $e) {
+            Log::error('Delivery QR PNG generation failed', array(
+                'error' => $e->getMessage(),
+            ));
+
+            return null;
+        }
     }
 }

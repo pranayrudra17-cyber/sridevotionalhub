@@ -3,10 +3,14 @@
 namespace App\Utility;
 
 use App\Mail\InvoiceEmailManager;
+use App\Mail\OrderDeliveredEmailManager;
+use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\User;
 use App\Models\SmsTemplate;
 use App\Http\Controllers\OTPVerificationController;
 use Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\OrderNotification;
 use App\Models\FirebaseNotification;
@@ -21,7 +25,9 @@ class NotificationUtility
         $array['from'] = env('MAIL_FROM_ADDRESS');
         $array['order'] = $order;
         try {
-            Mail::to($order->user->email)->queue(new InvoiceEmailManager($array));
+            $customerArray = $array;
+            $customerArray['include_delivery_qr'] = true;
+            Mail::to($order->user->email)->queue(new InvoiceEmailManager($customerArray));
             Mail::to($order->orderDetails->first()->product->user->email)->queue(new InvoiceEmailManager($array));
             // Added by Pranay Rudra
             $staff = User::where('user_type','staff')->get()->first();
@@ -118,5 +124,58 @@ class NotificationUtility
         $firebase_notification->receiver_id = $req->user_id;
 
         $firebase_notification->save();
+    }
+
+    /**
+     * Customer email after a QR scan marks an order item delivered.
+     * Must be called only after the delivery update is committed.
+     *
+     * @param \App\Models\Order $order
+     * @param \App\Models\OrderDetail $orderDetail
+     * @return void
+     */
+    public static function sendOrderItemDeliveredNotification($order, $orderDetail)
+    {
+        if (!$order instanceof Order || !$orderDetail instanceof OrderDetail) {
+            return;
+        }
+
+        $order->loadMissing(array('user', 'orderDetails.product'));
+        $orderDetail->loadMissing(array('product'));
+
+        $email = null;
+        if ($order->user && !empty($order->user->email)) {
+            $email = $order->user->email;
+        } else {
+            $shipping = json_decode($order->shipping_address);
+            if ($shipping && !empty($shipping->email)) {
+                $email = $shipping->email;
+            }
+        }
+
+        if (empty($email)) {
+            Log::warning('Order delivered email skipped: missing customer email', array(
+                'order_id' => $order->id,
+                'order_detail_id' => $orderDetail->id,
+            ));
+            return;
+        }
+
+        $array = array();
+        $array['view'] = 'emails.order_delivered';
+        $array['subject'] = translate('Your Order Has Been Successfully Delivered') . ' - ' . $order->code;
+        $array['from'] = env('MAIL_FROM_ADDRESS');
+        $array['order'] = $order;
+        $array['orderDetail'] = $orderDetail;
+
+        try {
+            Mail::to($email)->queue(new OrderDeliveredEmailManager($array));
+        } catch (\Exception $e) {
+            Log::error('Order delivered email failed', array(
+                'order_id' => $order->id,
+                'order_detail_id' => $orderDetail->id,
+                'error' => $e->getMessage(),
+            ));
+        }
     }
 }

@@ -158,6 +158,21 @@ class ProductDeliveryScanController extends Controller
             ), 500);
         }
 
+        if (!empty($result['delivered_order_details'])) {
+            try {
+                foreach ($result['delivered_order_details'] as $deliveredDetail) {
+                    NotificationUtility::sendOrderItemDeliveredNotification($result['order'], $deliveredDetail);
+                }
+                $this->notifyDeliveryIfOrderDelivered($result['order']);
+            } catch (Exception $e) {
+                Log::error('QR delivery notification failed after status update', array(
+                    'error' => $e->getMessage(),
+                    'order_id' => isset($result['order']) ? $result['order']->id : null,
+                    'admin_id' => Auth::id(),
+                ));
+            }
+        }
+
         return response()->json($result['body'], $result['http']);
     }
 
@@ -254,8 +269,10 @@ class ProductDeliveryScanController extends Controller
 
         $order->refresh();
         $firstUpdated = $updated[0]['order_detail']->fresh();
-
-        $this->notifyDeliveryIfOrderDelivered($order);
+        $deliveredDetails = array();
+        foreach ($updated as $row) {
+            $deliveredDetails[] = $row['order_detail']->fresh();
+        }
 
         $message = translate('Product marked as delivered successfully.');
         if (!$singleItem && count($updated) > 1) {
@@ -276,6 +293,8 @@ class ProductDeliveryScanController extends Controller
                     count($updated)
                 ),
             ),
+            'delivered_order_details' => $deliveredDetails,
+            'order' => $order,
         );
     }
 
