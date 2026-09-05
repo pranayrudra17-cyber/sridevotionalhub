@@ -18,6 +18,9 @@ class AdminController extends Controller
      */
     public function admin_dashboard(Request $request)
     {   
+        if(auth()->user()->roles->first()->id == 3){
+            return redirect()->route('admin.product.scan');
+        }
         CoreComponentRepository::initializeCache();
         $root_categories = Category::where('level', 0)->get();
 
