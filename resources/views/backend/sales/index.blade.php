@@ -46,9 +46,15 @@
                     <input type="text" class="form-control" id="search" name="search"@isset($sort_search) value="{{ $sort_search }}" @endisset placeholder="{{ translate('Type Order code & hit Enter') }}">
                 </div>
             </div>
+            <div class="col-lg-2">
+                <div class="form-group mb-0">
+                    <input type="text" class="form-control" id="pincode" name="pincode" value="{{ $pincode ?? '' }}" placeholder="{{ translate('Enter Pincode / Zipcode') }}" aria-label="{{ translate('Pincode / Zipcode') }}" autocomplete="off">
+                </div>
+            </div>
             <div class="col-auto">
                 <div class="form-group mb-0">
                     <button type="submit" class="btn btn-primary">{{ translate('Filter') }}</button>
+                    <a href="{{ route(Route::currentRouteName()) }}" class="btn btn-soft-secondary">{{ translate('Reset') }}</a>
                 </div>
             </div>
             @if(Route::currentRouteName() == 'all_orders.index')
@@ -239,7 +245,7 @@
 
         function exportAllOrders(el) {
             var params = [];
-            $('#sort_orders').find('#delivery_status, #payment_status, [name="date"], [name="search"]').each(function () {
+            $('#sort_orders').find('#delivery_status, #payment_status, [name="date"], [name="search"], [name="pincode"]').each(function () {
                 var value = $(this).val();
                 if (value) {
                     params.push(encodeURIComponent(this.name) + '=' + encodeURIComponent(value));

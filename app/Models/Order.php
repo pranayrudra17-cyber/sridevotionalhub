@@ -55,4 +55,50 @@ class Order extends Model
     {
         return $this->hasMany(ProxyPayment::class)->select('reference_id');
     }
+
+    /**
+     * Parse a pincode/zipcode filter value into unique trimmed codes.
+     * Supports a single value or comma-separated values.
+     *
+     * @param  mixed  $input
+     * @return array
+     */
+    public static function parseDeliveryPincodes($input)
+    {
+        if ($input === null) {
+            return array();
+        }
+
+        $pincodes = array();
+        foreach (explode(',', (string) $input) as $token) {
+            $token = trim($token);
+            if ($token === '') {
+                continue;
+            }
+            if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9 \-]{0,19}$/', $token)) {
+                continue;
+            }
+            if (!in_array($token, $pincodes, true)) {
+                $pincodes[] = $token;
+            }
+        }
+
+        return $pincodes;
+    }
+
+    /**
+     * Filter orders by delivery address postal_code stored in shipping_address JSON.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  array  $pincodes
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWhereDeliveryPincodeIn($query, array $pincodes)
+    {
+        if (empty($pincodes)) {
+            return $query->whereIn('orders.id', array());
+        }
+
+        return $query->whereIn('shipping_address->postal_code', $pincodes);
+    }
 }

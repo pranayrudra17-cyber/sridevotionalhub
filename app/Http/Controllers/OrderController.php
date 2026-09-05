@@ -52,6 +52,7 @@ class OrderController extends Controller
         $sort_search = null;
         $delivery_status = null;
         $payment_status = '';
+        $pincode = $request->pincode;
         
         $orders = $this->filteredOrdersQuery($request);
 
@@ -66,7 +67,7 @@ class OrderController extends Controller
         }
 
         $orders = $orders->paginate(15);
-        return view('backend.sales.index', compact('orders', 'sort_search', 'payment_status', 'delivery_status', 'date'));
+        return view('backend.sales.index', compact('orders', 'sort_search', 'payment_status', 'delivery_status', 'date', 'pincode'));
     }
 
     public function exportOrdersPdf(Request $request)
@@ -148,6 +149,9 @@ class OrderController extends Controller
             $orders = $orders->where('created_at', '>=', date('Y-m-d', strtotime(explode(" to ", $request->date)[0])).'  00:00:00')
             ->where('created_at', '<=', date('Y-m-d', strtotime(explode(" to ", $request->date)[1])).'  23:59:59');
         }
+        if ($request->filled('pincode')) {
+            $orders = $orders->whereDeliveryPincodeIn(Order::parseDeliveryPincodes($request->pincode));
+        }
 
         return $orders;
     }
@@ -163,6 +167,7 @@ class OrderController extends Controller
             'payment_status' => 'nullable|in:paid,unpaid',
             'delivery_status' => 'nullable|in:pending,confirmed,picked_up,on_the_way,delivered,cancelled',
             'date' => 'nullable|string|max:64',
+            'pincode' => 'nullable|string|max:255',
         ));
     }
 
@@ -184,6 +189,12 @@ class OrderController extends Controller
         }
         if ($request->date != null) {
             $parts[] = translate('Date') . ': ' . $request->date;
+        }
+        if ($request->filled('pincode')) {
+            $pincodes = Order::parseDeliveryPincodes($request->pincode);
+            if (!empty($pincodes)) {
+                $parts[] = translate('Pincode / Zipcode') . ': ' . implode(', ', $pincodes);
+            }
         }
 
         return implode(', ', $parts);
