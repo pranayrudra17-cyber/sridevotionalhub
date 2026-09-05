@@ -13,23 +13,23 @@ class CreatePaykuPaymentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('payku_payments', function (Blueprint $table) {
-            $table->string('transaction_id')->unique();
-            $table->date('start');
-            $table->date('end');
-            $table->string('media');
-            $table->string('verification_key');
-            $table->string('authorization_code');
-            $table->unsignedInteger('last_4_digits')->nullable();
-            $table->string('installments')->nullable();
-            $table->string('card_type')->nullable();
-            $table->string('additional_parameters')->nullable();
-            $table->string('currency');
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+        // Schema::create('payku_payments', function (Blueprint $table) {
+        //     $table->string('transaction_id')->unique();
+        //     $table->date('start');
+        //     $table->date('end');
+        //     $table->string('media');
+        //     $table->string('verification_key');
+        //     $table->string('authorization_code');
+        //     $table->unsignedInteger('last_4_digits')->nullable();
+        //     $table->string('installments')->nullable();
+        //     $table->string('card_type')->nullable();
+        //     $table->string('additional_parameters')->nullable();
+        //     $table->string('currency');
+        //     $table->timestamp('created_at')->nullable();
+        //     $table->timestamp('updated_at')->nullable();
 
-            $table->foreign('transaction_id')->references('id')->on('payku_transactions');
-        });
+        //     $table->foreign('transaction_id')->references('id')->on('payku_transactions');
+        // });
     }
 
     /**
@@ -39,6 +39,6 @@ class CreatePaykuPaymentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('payku_payments');
+        // Schema::dropIfExists('payku_payments');
     }
 }

@@ -13,15 +13,15 @@ class AddNewColumnsToTables extends Migration
      */
     public function up()
     {
-        Schema::table('payku_transactions', function (Blueprint $table) {
-            $table->string('full_name')->nullable();
-        });
+        // Schema::table('payku_transactions', function (Blueprint $table) {
+        //     $table->string('full_name')->nullable();
+        // });
 
-        Schema::table('payku_payments', function (Blueprint $table) {
-            $table->string('payment_key')->nullable();
-            $table->string('transaction_key')->nullable();
-            $table->datetime('deposit_date')->nullable();
-        });
+        // Schema::table('payku_payments', function (Blueprint $table) {
+        //     $table->string('payment_key')->nullable();
+        //     $table->string('transaction_key')->nullable();
+        //     $table->datetime('deposit_date')->nullable();
+        // });
     }
 
     /**
@@ -31,6 +31,6 @@ class AddNewColumnsToTables extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('payku_payments');
+        // Schema::dropIfExists('payku_payments');
     }
 }
