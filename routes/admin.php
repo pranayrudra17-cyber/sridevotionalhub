@@ -331,6 +331,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function(
     Route::controller(OrderController::class)->group(function () {
         // All Orders
         Route::get('/all_orders', 'all_orders')->name('all_orders.index');
+        Route::get('/all_orders/export/pdf', 'exportOrdersPdf')->name('all_orders.export.pdf');
+        Route::get('/all_orders/export/excel', 'exportOrdersExcel')->name('all_orders.export.excel');
         Route::get('/inhouse-orders', 'all_orders')->name('inhouse_orders.index');
         Route::get('/seller_orders', 'all_orders')->name('seller_orders.index');
         Route::get('orders_by_pickup_point', 'all_orders')->name('pick_up_point.index');

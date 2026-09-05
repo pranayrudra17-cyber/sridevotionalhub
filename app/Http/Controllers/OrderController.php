@@ -22,7 +22,11 @@ use App\Utility\NotificationUtility;
 use CoreComponentRepository;
 use App\Utility\SmsUtility;
 use App\Services\DeliveryAvailabilityService;
+use App\Exports\OrdersExport;
 use Illuminate\Support\Facades\Route;
+use PDF;
+use Excel;
+use Session;
 
 class OrderController extends Controller
 {
@@ -35,6 +39,8 @@ class OrderController extends Controller
         $this->middleware(['permission:view_pickup_point_orders'])->only('all_orders');
         $this->middleware(['permission:view_order_details'])->only('show');
         $this->middleware(['permission:delete_order'])->only('destroy');
+        $this->middleware(['permission:export_orders_pdf'])->only('exportOrdersPdf');
+        $this->middleware(['permission:export_orders_excel'])->only('exportOrdersExcel');
     }
     
     // All Orders
@@ -47,15 +53,82 @@ class OrderController extends Controller
         $delivery_status = null;
         $payment_status = '';
         
+        $orders = $this->filteredOrdersQuery($request);
+
+        if ($request->search) {
+            $sort_search = $request->search;
+        }
+        if ($request->payment_status != null) {
+            $payment_status = $request->payment_status;
+        }
+        if ($request->delivery_status != null) {
+            $delivery_status = $request->delivery_status;
+        }
+
+        $orders = $orders->paginate(15);
+        return view('backend.sales.index', compact('orders', 'sort_search', 'payment_status', 'delivery_status', 'date'));
+    }
+
+    public function exportOrdersPdf(Request $request)
+    {
+        $this->validateOrderExportFilters($request);
+
+        $orders = $this->filteredOrdersQuery($request, 'all_orders.index')
+            ->with(array('user', 'orderDetails.product'))
+            ->get();
+
+        $pdfConfig = $this->orderExportPdfConfig();
+
+        return PDF::loadView('backend.sales.exports.all_orders_pdf', array(
+            'orders' => $orders,
+            'font_family' => $pdfConfig['font_family'],
+            'direction' => $pdfConfig['direction'],
+            'text_align' => $pdfConfig['text_align'],
+            'not_text_align' => $pdfConfig['not_text_align'],
+            'filter_summary' => $this->orderExportFilterSummary($request),
+        ), array(), array(
+            'format' => 'A4-L',
+            'orientation' => 'L',
+            'margin_left' => 8,
+            'margin_right' => 8,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ))->download('all_orders_' . date('Y-m-d_H-i') . '.pdf');
+    }
+
+    public function exportOrdersExcel(Request $request)
+    {
+        $this->validateOrderExportFilters($request);
+
+        $query = $this->filteredOrdersQuery($request, 'all_orders.index')
+            ->with(array('user', 'orderDetails.product'));
+
+        return Excel::download(
+            new OrdersExport($query),
+            'all_orders_' . date('Y-m-d_H-i') . '.xlsx'
+        );
+    }
+
+    /**
+     * Shared order listing/export filters. Keep listing behavior unchanged.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string|null  $routeName
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function filteredOrdersQuery(Request $request, $routeName = null)
+    {
+        $routeName = $routeName ?: Route::currentRouteName();
+
         $orders = Order::orderBy('id', 'desc');
         $admin_user_id = User::where('user_type', 'admin')->first()->id;
-        if(Route::currentRouteName() == 'inhouse_orders.index') {
+        if($routeName == 'inhouse_orders.index') {
             $orders = $orders->where('orders.seller_id', '=', $admin_user_id);
         }
-        if(Route::currentRouteName() == 'seller_orders.index') {
+        if($routeName == 'seller_orders.index') {
             $orders = $orders->where('orders.seller_id', '!=', $admin_user_id);
         }
-        if(Route::currentRouteName() == 'pick_up_point.index') {
+        if($routeName == 'pick_up_point.index') {
             $orders->where('shipping_type', 'pickup_point')->orderBy('code', 'desc');
             if (Auth::user()->user_type == 'staff' && Auth::user()->staff->pick_up_point != null) {
                 $orders->where('shipping_type', 'pickup_point')
@@ -63,23 +136,100 @@ class OrderController extends Controller
             }
         }
         if ($request->search) {
-            $sort_search = $request->search;
-            $orders = $orders->where('code', 'like', '%' . $sort_search . '%');
+            $orders = $orders->where('code', 'like', '%' . $request->search . '%');
         }
         if ($request->payment_status != null) {
             $orders = $orders->where('payment_status', $request->payment_status);
-            $payment_status = $request->payment_status;
         }
         if ($request->delivery_status != null) {
             $orders = $orders->where('delivery_status', $request->delivery_status);
-            $delivery_status = $request->delivery_status;
         }
-        if ($date != null) {
-            $orders = $orders->where('created_at', '>=', date('Y-m-d', strtotime(explode(" to ", $date)[0])).'  00:00:00')
-            ->where('created_at', '<=', date('Y-m-d', strtotime(explode(" to ", $date)[1])).'  23:59:59');
+        if ($request->date != null) {
+            $orders = $orders->where('created_at', '>=', date('Y-m-d', strtotime(explode(" to ", $request->date)[0])).'  00:00:00')
+            ->where('created_at', '<=', date('Y-m-d', strtotime(explode(" to ", $request->date)[1])).'  23:59:59');
         }
-        $orders = $orders->paginate(15);
-        return view('backend.sales.index', compact('orders', 'sort_search', 'payment_status', 'delivery_status', 'date'));
+
+        return $orders;
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
+     */
+    protected function validateOrderExportFilters(Request $request)
+    {
+        $request->validate(array(
+            'search' => 'nullable|string|max:191',
+            'payment_status' => 'nullable|in:paid,unpaid',
+            'delivery_status' => 'nullable|in:pending,confirmed,picked_up,on_the_way,delivered,cancelled',
+            'date' => 'nullable|string|max:64',
+        ));
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return string
+     */
+    protected function orderExportFilterSummary(Request $request)
+    {
+        $parts = array();
+        if ($request->search) {
+            $parts[] = translate('Order Code') . ': ' . $request->search;
+        }
+        if ($request->payment_status != null) {
+            $parts[] = translate('Payment Status') . ': ' . $request->payment_status;
+        }
+        if ($request->delivery_status != null) {
+            $parts[] = translate('Delivery Status') . ': ' . $request->delivery_status;
+        }
+        if ($request->date != null) {
+            $parts[] = translate('Date') . ': ' . $request->date;
+        }
+
+        return implode(', ', $parts);
+    }
+
+    /**
+     * @return array
+     */
+    protected function orderExportPdfConfig()
+    {
+        $currency_code = Session::has('currency_code')
+            ? Session::get('currency_code')
+            : \App\Models\Currency::findOrFail(get_setting('system_default_currency'))->code;
+        $language_code = Session::get('locale', \Config::get('app.locale'));
+
+        $language = \App\Models\Language::where('code', $language_code)->first();
+        if ($language && $language->rtl == 1) {
+            $direction = 'rtl';
+            $text_align = 'right';
+            $not_text_align = 'left';
+        } else {
+            $direction = 'ltr';
+            $text_align = 'left';
+            $not_text_align = 'right';
+        }
+
+        if ($currency_code == 'BDT' || $language_code == 'bd') {
+            $font_family = "'Hind Siliguri','sans-serif'";
+        } elseif ($currency_code == 'KHR' || $language_code == 'kh') {
+            $font_family = "'Hanuman','sans-serif'";
+        } elseif ($currency_code == 'AMD') {
+            $font_family = "'arnamu','sans-serif'";
+        } elseif ($currency_code == 'AED' || $currency_code == 'EGP' || $language_code == 'sa' || $currency_code == 'IQD' || $language_code == 'ir' || $language_code == 'om' || $currency_code == 'ROM' || $currency_code == 'SDG' || $currency_code == 'ILS' || $language_code == 'jo') {
+            $font_family = "'Baloo Bhaijaan 2','sans-serif'";
+        } elseif ($currency_code == 'THB') {
+            $font_family = "'Kanit','sans-serif'";
+        } else {
+            $font_family = "'Roboto','sans-serif'";
+        }
+
+        return array(
+            'font_family' => $font_family,
+            'direction' => $direction,
+            'text_align' => $text_align,
+            'not_text_align' => $not_text_align,
+        );
     }
 
     public function show($id)

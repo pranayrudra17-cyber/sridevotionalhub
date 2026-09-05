@@ -51,6 +51,20 @@
                     <button type="submit" class="btn btn-primary">{{ translate('Filter') }}</button>
                 </div>
             </div>
+            @if(Route::currentRouteName() == 'all_orders.index')
+                @canany(['export_orders_pdf', 'export_orders_excel'])
+                    <div class="col-auto mt-2">
+                        <div class="form-group mb-0">
+                            @can('export_orders_pdf')
+                                <a href="{{ route('all_orders.export.pdf') }}" class="btn btn-soft-danger" onclick="return exportAllOrders(this);">{{ translate('Export PDF') }}</a>
+                            @endcan
+                            @can('export_orders_excel')
+                                <a href="{{ route('all_orders.export.excel') }}" class="btn btn-soft-success" onclick="return exportAllOrders(this);">{{ translate('Export Excel') }}</a>
+                            @endcan
+                        </div>
+                    </div>
+                @endcanany
+            @endif
         </div>
 
         <div class="card-body">
@@ -222,6 +236,19 @@
 //                }
 //            });
 //        }
+
+        function exportAllOrders(el) {
+            var params = [];
+            $('#sort_orders').find('#delivery_status, #payment_status, [name="date"], [name="search"]').each(function () {
+                var value = $(this).val();
+                if (value) {
+                    params.push(encodeURIComponent(this.name) + '=' + encodeURIComponent(value));
+                }
+            });
+            var url = el.href.split('?')[0];
+            window.location = url + (params.length ? ('?' + params.join('&')) : '');
+            return false;
+        }
 
         function bulk_delete() {
             var data = new FormData($('#sort_orders')[0]);
