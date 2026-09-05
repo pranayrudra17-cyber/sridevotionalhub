@@ -1,5 +1,5 @@
 <div class="modal fade" id="new-address-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">{{ translate('New Address') }}</h5>
@@ -11,14 +11,7 @@
                 @csrf
                 <div class="modal-body">
                     <div class="p-3">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <label>{{ translate('Address')}}</label>
-                            </div>
-                            <div class="col-md-10">
-                                <textarea class="form-control mb-3" placeholder="{{ translate('Your Address')}}" rows="2" name="address" required></textarea>
-                            </div>
-                        </div>
+                        @include('frontend.partials.address_detail_fields')
                         <div class="row">
                             <div class="col-md-2">
                                 <label>{{ translate('Country')}}</label>

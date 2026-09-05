@@ -20,7 +20,7 @@ class AddressController extends Controller
     {
         $address = new Address;
         $address->user_id       = Auth::user()->id;
-        $address->address       = $request->address;
+        $address->applyDetailFieldsFromRequest($request);
         $address->country_id    = $request->country_id;
         $address->state_id      = $request->state_id;
         $address->city_id       = $request->city_id;
@@ -61,7 +61,7 @@ class AddressController extends Controller
     {
         $address = Address::findOrFail($id);
         
-        $address->address       = $request->address;
+        $address->applyDetailFieldsFromRequest($request);
         $address->country_id    = $request->country_id;
         $address->state_id      = $request->state_id;
         $address->city_id       = $request->city_id;

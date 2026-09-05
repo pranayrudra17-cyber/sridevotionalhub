@@ -1,14 +1,12 @@
 <form class="form-default" role="form" action="{{ route('seller.addresses.update', $address_data->id) }}" method="POST">
     @csrf
     <div class="p-3">
-        <div class="row">
-            <div class="col-md-2">
-                <label>{{ translate('Address')}}</label>
-            </div>
-            <div class="col-md-10">
-                <textarea class="form-control mb-3" placeholder="{{ translate('Your Address')}}" rows="2" name="address" required>{{ $address_data->address }}</textarea>
-            </div>
-        </div>
+        @include('frontend.partials.address_detail_fields', [
+            'street_house_no' => $address_data->street_house_no ?: $address_data->address,
+            'nearby_landmark' => $address_data->nearby_landmark,
+            'area_locality' => $address_data->area_locality,
+            'additional_address_details' => $address_data->additional_address_details,
+        ])
         <div class="row">
             <div class="col-md-2">
                 <label>{{ translate('Country')}}</label>
